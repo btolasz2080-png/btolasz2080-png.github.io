@@ -2,7 +2,6 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import FolderGrid from '../components/FolderGrid.astro';
-import HeroShowcase from '../components/HeroShowcase.astro';
 import CertificatePaper from '../components/CertificatePaper.astro';
 import Seal from '../components/Seal.astro';
 import { site } from '../data/site';
@@ -44,32 +43,29 @@ const folders = [
     empty: 'My college projects are being uploaded to GitHub — coming soon.',
   },
 ];
-const showcase = [
-  { title: 'Cisco Networking Academy', href: '/courses/cisco/', accent: 'burgundy', domain: 'my-files / cisco' },
-  { title: 'Coursera', href: '/courses/coursera/', accent: 'blue' },
-  { title: 'Certificates', href: '/certificates/', accent: 'espresso' },
-] as const;
 ---
 <Base>
-  <!-- ───────────── HERO: the binary queen ───────────── -->
+  <!-- ───────────── HERO: same look as the GitHub profile header ───────────── -->
   <section class="hero" data-hero>
-    <div class="wrap hero-grid">
-      <div class="hero-copy">
-        <p class="eyebrow" data-hero-in>{site.eyebrow.join(' · ')}</p>
-        <h1 class="display hero-title" data-hero-split>
-          {headline.map((parts) => (
-            <span class="hl-line">{parts.map((p) => (p.accent ? <span class="accent">{p.text}</span> : <span class="gold">{p.text}</span>))}</span>
-          ))}
-        </h1>
-        <p class="lead hero-intro" data-hero-in>Hi, I'm <strong>{site.name}</strong>. {site.intro}</p>
-        <div class="hero-actions" data-hero-in>
-          <a class="btn" href="#files" data-magnetic>Open my files <span class="arrow" aria-hidden="true">↓</span></a>
-          <a class="btn ghost" href={site.github} target="_blank" rel="noopener" data-magnetic>GitHub profile</a>
+    <div class="wrap">
+      <div class="hero-card dark">
+        <div class="hero-copy">
+          <p class="eyebrow" data-hero-in>{site.eyebrow.join(' · ')}</p>
+          <h1 class="display hero-name" data-hero-split><span class="gold">{site.name}</span></h1>
+          <p class="hero-line" data-hero-in>
+            {headline.flat().map((p) => (p.accent ? <span class="accent">{p.text} </span> : <span class="gold-soft">{p.text} </span>))}
+          </p>
+          <p class="hero-intro" data-hero-in>{site.intro}</p>
+          <div class="hero-actions" data-hero-in>
+            <a class="btn" href="#files" data-magnetic>Open my files <span class="arrow" aria-hidden="true">↓</span></a>
+            <a class="btn ghost" href={site.github} target="_blank" rel="noopener" data-magnetic>GitHub profile</a>
+          </div>
+          <p class="hero-status mono" data-hero-in><span class="live"></span>{site.availability}</p>
         </div>
-        <p class="hero-status mono" data-hero-in><span class="live"></span>{site.availability}</p>
-      </div>
-      <div class="hero-visual">
-        <HeroShowcase items={[...showcase]} />
+        <div class="hero-queen" data-hero-in>
+          <div class="bq" data-binary-queen></div>
+          <p class="bq-hint mono">♛ move your mouse through the queen · click for a ripple</p>
+        </div>
       </div>
     </div>
   </section>
@@ -96,10 +92,6 @@ const showcase = [
         <h2 class="h2" data-split><span class="gold">Small moves,</span> <span class="accent">every day.</span></h2>
         {site.about.story.slice(0, 2).map((p) => <p class="lead" data-reveal>{p}</p>)}
         <a class="btn" href={url('/about/')} data-magnetic data-reveal>More about me <span class="arrow" aria-hidden="true">→</span></a>
-      </div>
-      <div class="about-queen">
-        <div class="bq" data-binary-queen></div>
-        <p class="bq-hint mono">♛ move your mouse through the queen · click for a ripple</p>
       </div>
       <ol class="moves">
         {site.about.timeline.map((t, i) => (
@@ -155,30 +147,36 @@ const showcase = [
 </Base>
 
 <style>
-  .hero { position: relative; z-index: 2; overflow-x: clip; min-height: 100svh; padding: 150px 0 70px; display: grid; align-content: center; }
-  .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(24px, 4vw, 64px); align-items: center; }
-  .hero-copy { display: grid; gap: 1.5rem; justify-items: start; }
-  .hero-title { font-size: clamp(3rem, 5.6vw, 5.6rem); }
-  .hl-line { display: block; }
-  .hero-intro { margin: 0; }
-  .hero-intro strong { color: var(--ink); font-weight: 600; }
+  .hero { position: relative; z-index: 2; padding: 110px 0 40px; }
+  .hero-card {
+    position: relative; overflow: hidden; border-radius: 28px;
+    display: grid; grid-template-columns: 1.05fr .95fr; align-items: center; gap: clamp(16px, 3vw, 40px);
+    min-height: min(78svh, 720px); padding: clamp(28px, 5vw, 70px) clamp(22px, 4vw, 64px);
+    background: linear-gradient(135deg, #1A0905, #2A120B);
+    box-shadow: 0 40px 80px -40px rgba(26, 9, 5, .7);
+  }
+  .hero-card::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(45% 60% at 76% 50%, rgba(201, 165, 94, .16), transparent 70%); }
+  .hero-copy { position: relative; z-index: 1; display: grid; gap: 1.3rem; justify-items: start; }
+  .hero-name { font-size: clamp(3.4rem, 7.4vw, 7rem); line-height: .95; }
+  .hero-line { margin: 0; font-family: var(--serif); font-size: clamp(1.6rem, 2.8vw, 2.5rem); line-height: 1.15; }
+  .gold-soft { color: #E2C98A; }
+  .hero-intro { margin: 0; color: var(--ink-soft); max-width: 34em; font-size: 1.02rem; }
   .hero-actions { display: flex; flex-wrap: wrap; gap: .7rem; }
   .hero-status { display: inline-flex; align-items: center; gap: .7em; color: var(--ink-soft); font-size: .68rem; margin: 0; }
-  .live { width: 8px; height: 8px; border-radius: 50%; background: #3F7A4F; box-shadow: 0 0 0 4px rgba(63, 122, 79, .18); }
-  .hero-visual { position: relative; }
-  .about-queen { display: grid; gap: .4rem; }
-  .bq { position: relative; width: 100%; max-width: 420px; margin: 0 auto; aspect-ratio: 1 / 1.02; touch-action: pan-y; }
+  .live { width: 8px; height: 8px; border-radius: 50%; background: #D9B064; box-shadow: 0 0 0 4px rgba(217, 176, 100, .2); animation: blink 2s infinite; }
+  @keyframes blink { 50% { box-shadow: 0 0 0 8px rgba(217, 176, 100, 0); } }
+  .hero-queen { position: relative; z-index: 1; display: grid; gap: .4rem; }
+  .bq { position: relative; width: 100%; max-width: 560px; margin: 0 auto; aspect-ratio: 1 / 1.02; touch-action: pan-y; }
   .bq :global(canvas) { position: absolute; inset: 0; cursor: crosshair; }
-  .bq-hint { margin: 0; text-align: center; color: var(--ink-soft); font-size: .64rem; }
+  .bq-hint { margin: 0; text-align: center; color: var(--ink-soft); font-size: .62rem; }
   @media (max-width: 900px) {
-    .hero-grid { grid-template-columns: 1fr; }
-    .hero { padding-top: 110px; }
+    .hero { padding-top: 90px; }
+    .hero-card { grid-template-columns: 1fr; }
+    .hero-queen { order: -1; max-width: 420px; width: 100%; margin: 0 auto; }
   }
 
   .about-strip { position: relative; z-index: 2; overflow: hidden; }
-  .about-grid { position: relative; display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(28px, 5vw, 70px); align-items: center; }
-  .moves { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 2rem; }
-  @media (max-width: 860px) { .moves { grid-template-columns: 1fr; } }
+  .about-grid { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 6vw, 90px); align-items: center; }
   .about-copy { display: grid; gap: 1.3rem; justify-items: start; }
   .about-copy .lead { margin: 0; }
   .moves { list-style: none; margin: 0; padding: 0; }
