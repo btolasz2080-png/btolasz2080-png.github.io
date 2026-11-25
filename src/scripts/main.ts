@@ -1,6 +1,5 @@
 // Entry point: wires every animation module together.
 import { gsap, ScrollTrigger, SplitText, initSmoothScroll, reduceMotion } from './motion';
-import { initTransitions } from './transitions';
 import { initCursor, initMagnetic, initTilt } from './pointer';
 import { initReveals, initCounters, initMarquees, initSeals, initHeader } from './scroll';
 import { initFolders } from './folders';
@@ -30,7 +29,6 @@ function heroIntro(visualTl: gsap.core.Timeline | null) {
 
 async function start() {
   initSmoothScroll();
-  const enter = initTransitions();
   initHeader();
   initMenu();
   initCursor();
@@ -50,9 +48,7 @@ async function start() {
   initBinaryQueen();
   initReveals();
 
-  const go = () => intro?.play();
-  if (enter) enter.eventCallback('onComplete', go);
-  else go();
+  intro?.play();
 
   ScrollTrigger.refresh();
 }
