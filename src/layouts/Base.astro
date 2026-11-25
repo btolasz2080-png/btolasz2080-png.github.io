@@ -25,8 +25,14 @@ const fullTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Pinyon+Script&display=swap" rel="stylesheet" />
     <script is:inline>
-      // Runs before paint: mark JS as available.
+      // Runs before paint: mark JS as available, and keep the chessboard
+      // transition covering the screen if we arrived from an animated link.
       document.documentElement.classList.add('js');
+      try {
+        if (sessionStorage.getItem('pt') === '1' && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.documentElement.classList.add('pt-enter');
+        }
+      } catch (e) {}
     </script>
   </head>
   <body>
@@ -42,6 +48,23 @@ const fullTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site
     <div class="cursor" aria-hidden="true"></div>
     <div class="cursor-ring" aria-hidden="true"><span></span></div>
 
+    <div class="pt" aria-hidden="true">
+      {Array.from({ length: 64 }, (_, i) => <i class={(Math.floor(i / 8) + i) % 2 ? 'alt' : ''}></i>)}
+    </div>
+    <div class="pt-mark" aria-hidden="true">
+      <svg viewBox="0 0 100 170"><use href="#pt-queen" /></svg>
+    </div>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <symbol id="pt-queen" viewBox="0 0 100 170">
+        <g fill="url(#pc-gold)">
+          <path d="M35 76 Q43 84 43 98 Q43 118 30 138 L70 138 Q57 118 57 98 Q57 84 65 76 Z" />
+          <path d="M22 40 L33 70 L67 70 L78 40 L67 55 L65 30 L57 52 L50 24 L43 52 L35 30 L33 55 Z" />
+          <rect x="30" y="67" width="40" height="9" rx="3.5" />
+          <circle cx="50" cy="15" r="6.5" /><circle cx="22" cy="38" r="3.8" /><circle cx="35" cy="28" r="3.8" /><circle cx="65" cy="28" r="3.8" /><circle cx="78" cy="38" r="3.8" />
+          <path d="M24 138 H76 Q81 138 81 143 V147 H19 V143 Q19 138 24 138 Z" /><rect x="15" y="147" width="70" height="12" rx="4" />
+        </g>
+      </symbol>
+    </svg>
 
     <script>
       import '../scripts/main';
