@@ -1,0 +1,44 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import FolderStack from '../../components/FolderStack.astro';
+import { platforms, type PlatformKey } from '../../lib/url';
+
+const courses = await getCollection('courses');
+const count = (k: PlatformKey) => courses.filter((c) => c.data.platform === k).length;
+const hours = courses.reduce((s, c) => s + (c.data.hours || 0), 0);
+const pad = (n: number) => String(n).padStart(2, '0');
+const teasers: Record<PlatformKey, string> = {
+  cisco: 'Networking, cybersecurity and Python from the Cisco Networking Academy.',
+  coursera: 'University-backed specializations in machine learning and data.',
+  other: 'freeCodeCamp, edX and every other place I keep learning.',
+};
+const items = (Object.keys(platforms) as PlatformKey[]).map((k) => ({
+  label: platforms[k].label,
+  href: `/courses/${k}/`,
+  color: platforms[k].folder,
+  meta: `${platforms[k].code} · ${pad(count(k))} courses`,
+  teaser: teasers[k],
+}));
+---
+<Base title="Courses" description="Every course I have completed, filed by learning platform.">
+  <PageHead tag="b2 — Learning" title="The course" accent="archive." lead="Each learning platform has its own folder. Open one to see every course inside it." />
+  <section class="wrap courses-wrap">
+    <div class="summary" data-reveal>
+      <div><strong data-count={courses.length}>{pad(courses.length)}</strong><span>Courses completed</span></div>
+      <div><strong data-count={hours}>{hours}</strong><span>Learning hours</span></div>
+      <div><strong data-count={3}>03</strong><span>Platforms</span></div>
+    </div>
+    <FolderStack items={items as any} />
+  </section>
+</Base>
+
+<style>
+  .courses-wrap { padding-bottom: clamp(90px, 12vw, 160px); }
+  .summary { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); margin-bottom: clamp(40px, 6vw, 80px); }
+  .summary div { display: grid; padding-top: 1.2rem; }
+  .summary div + div { border-left: 1px solid var(--line); padding-left: clamp(12px, 2vw, 28px); }
+  .summary strong { font-family: var(--serif); font-weight: 500; font-size: clamp(2.2rem, 4vw, 3.4rem); color: var(--burgundy); line-height: 1; }
+  .summary span { font-family: var(--mono); font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
+</style>

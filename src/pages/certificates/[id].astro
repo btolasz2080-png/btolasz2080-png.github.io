@@ -1,0 +1,66 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import CertificatePaper from '../../components/CertificatePaper.astro';
+import { url, formatDate, platforms } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const certs = (await getCollection('certificates')).sort((a, b) => +b.data.issued - +a.data.issued);
+  return certs.map((cert, i) => ({ params: { id: cert.id }, props: { cert, next: certs[(i + 1) % certs.length] } }));
+}
+const { cert, next } = Astro.props;
+const d = cert.data;
+const course = d.course ? await getEntry('courses', d.course) : undefined;
+---
+<Base title={d.title} description={`${d.title} — issued by ${d.issuer}.`}>
+  <section class="c-head">
+    <div class="wrap c-grid">
+      <div class="c-copy">
+        <a class="back mono link-line" href={url('/certificates/')}>← All certificates</a>
+        <p class="square-tag" data-reveal>{platforms[d.platform].long}</p>
+        <h1 class="h1" data-split><span class="gold">{d.title}</span></h1>
+        {d.sample && <p class="sample-badge" data-reveal>Sample entry — replace with your real certificate</p>}
+        <dl class="c-meta" data-reveal>
+          <div><dt>Issuer</dt><dd>{d.issuer}</dd></div>
+          <div><dt>Issued</dt><dd>{formatDate(d.issued, 'long')}</dd></div>
+          {d.credentialId && <div><dt>Credential ID</dt><dd class="mono">{d.credentialId}</dd></div>}
+          {course && <div><dt>Course</dt><dd><a class="link-line" href={url(`/courses/${course.data.platform}/`)}>{course.data.title}</a></dd></div>}
+        </dl>
+        {d.skills.length > 0 && (
+          <div class="c-skills" data-reveal>
+            <p class="mono">Skills proven</p>
+            <ul class="chips">{d.skills.map((s) => <li class="chip">{s}</li>)}</ul>
+          </div>
+        )}
+        {d.verifyUrl && (
+          <a class="btn" href={d.verifyUrl} target="_blank" rel="noopener" data-magnetic data-reveal>Verify credential <span class="arrow">→</span></a>
+        )}
+      </div>
+      <div class="c-visual" data-reveal>
+        <div data-tilt data-cursor="Tilt"><CertificatePaper title={d.title} issuer={d.issuer} issued={d.issued} image={d.image} large /></div>
+      </div>
+    </div>
+  </section>
+  <a class="next dark" href={url(`/certificates/${next.id}/`)} data-cursor="Next">
+    <div class="wrap">
+      <span class="square-tag">Next certificate</span>
+      <span class="h1 gold">{next.data.title}</span>
+    </div>
+  </a>
+</Base>
+
+<style>
+  .c-head { padding: clamp(130px, 16vw, 190px) 0 clamp(90px, 12vw, 150px); }
+  .c-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: clamp(32px, 6vw, 90px); align-items: center; }
+  .c-copy { display: grid; gap: 1.5rem; justify-items: start; }
+  .back { color: var(--ink-soft); }
+  .c-meta { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem 2rem; width: 100%; }
+  .c-meta div { display: grid; gap: .3rem; border-top: 1px solid var(--line); padding-top: .8rem; }
+  dt { font-family: var(--mono); font-size: .66rem; letter-spacing: .16em; text-transform: uppercase; color: var(--burgundy); }
+  dd { margin: 0; }
+  .c-skills { display: grid; gap: .7rem; }
+  .c-skills .mono { margin: 0; color: var(--ink-soft); font-size: .68rem; }
+  @media (max-width: 860px) { .c-grid { grid-template-columns: 1fr; } .c-visual { order: -1; } .c-meta { grid-template-columns: 1fr; } }
+  .next { display: block; position: relative; z-index: 2; padding: clamp(70px, 10vw, 130px) 0; }
+  .next .wrap { display: grid; gap: 1rem; }
+</style>

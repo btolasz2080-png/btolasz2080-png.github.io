@@ -1,0 +1,49 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import CertificatePaper from '../../components/CertificatePaper.astro';
+import { url, formatDate, platforms, type PlatformKey } from '../../lib/url';
+
+const certs = (await getCollection('certificates')).sort((a, b) => +b.data.issued - +a.data.issued);
+const used = (Object.keys(platforms) as PlatformKey[]).filter((k) => certs.some((c) => c.data.platform === k));
+---
+<Base title="Certificates" description="Verified certificates, each with its own detail page.">
+  <PageHead tag="e5 — Credentials" title="Certificates" accent="& proof." lead="Every certificate links to its issuer so anyone can verify it.">
+    <div class="filters" data-filter-group="#cert-grid" data-reveal role="group" aria-label="Filter certificates">
+      <button type="button" data-filter="all" aria-pressed="true">All <sup>{certs.length}</sup></button>
+      {used.map((k) => (
+        <button type="button" data-filter={k} aria-pressed="false">{platforms[k].label} <sup>{certs.filter((c) => c.data.platform === k).length}</sup></button>
+      ))}
+    </div>
+  </PageHead>
+  <section class="wrap cgrid-wrap">
+    <div class="cgrid" id="cert-grid">
+      {certs.map((c) => (
+        <article data-flip-item data-category={c.data.platform}>
+          <a class="ccard" href={url(`/certificates/${c.id}/`)} data-cursor="Open">
+            <div data-tilt><CertificatePaper title={c.data.title} issuer={c.data.issuer} issued={c.data.issued} image={c.data.image} /></div>
+            <div class="ccard-meta">
+              <span class="mono">{platforms[c.data.platform].label} · {formatDate(c.data.issued)}</span>
+              <h2 class="h3">{c.data.title}</h2>
+              <span class="issuer">{c.data.issuer}</span>
+            </div>
+          </a>
+        </article>
+      ))}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .cgrid-wrap { padding-bottom: clamp(90px, 12vw, 160px); }
+  .cgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(36px, 5vw, 70px) clamp(18px, 3vw, 36px); }
+  .ccard { display: grid; gap: 1.2rem; }
+  .ccard-meta { display: grid; gap: .35rem; }
+  .ccard-meta .mono { color: var(--burgundy); font-size: .68rem; }
+  .ccard .h3 { transition: color .4s; }
+  .ccard:hover .h3 { color: var(--burgundy); }
+  .issuer { color: var(--ink-soft); font-size: .95rem; }
+  @media (max-width: 960px) { .cgrid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .cgrid { grid-template-columns: 1fr; } }
+</style>

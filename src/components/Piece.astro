@@ -1,0 +1,37 @@
+---
+// A chess piece drawn as SVG. type: queen | pawn | rook. tone: gold | ivory | ebony | wine
+interface Props { type?: 'queen' | 'pawn' | 'rook'; tone?: 'gold' | 'ivory' | 'ebony' | 'wine'; class?: string; title?: string }
+const { type = 'queen', tone = 'gold', class: cls = '', title } = Astro.props;
+const fill = `url(#pc-${tone})`;
+const stroke = { gold: '#5A3D0E', ivory: '#8D8366', ebony: '#000', wine: '#1E0104' }[tone];
+---
+<svg class={`piece piece-${type} ${cls}`} viewBox="0 0 100 170" role={title ? 'img' : undefined} aria-hidden={title ? undefined : 'true'} aria-label={title}>
+  <g fill={fill} stroke={stroke} stroke-width="1.2" stroke-linejoin="round">
+    {type === 'queen' && (
+      <>
+        <path d="M35 76 Q43 84 43 98 Q43 118 30 138 L70 138 Q57 118 57 98 Q57 84 65 76 Z" />
+        <rect x="37" y="104" width="26" height="5" rx="2.5" />
+        <path d="M22 40 L33 70 L67 70 L78 40 L67 55 L65 30 L57 52 L50 24 L43 52 L35 30 L33 55 Z" />
+        <rect x="30" y="67" width="40" height="9" rx="3.5" />
+        <circle cx="22" cy="38" r="3.8" /><circle cx="35" cy="28" r="3.8" /><circle cx="65" cy="28" r="3.8" /><circle cx="78" cy="38" r="3.8" />
+        <circle cx="50" cy="15" r="6.5" />
+      </>
+    )}
+    {type === 'pawn' && (
+      <>
+        <path d="M40 92 Q45 112 32 138 L68 138 Q55 112 60 92 Z" />
+        <rect x="36" y="86" width="28" height="7" rx="3" />
+        <circle cx="50" cy="71" r="15" />
+      </>
+    )}
+    {type === 'rook' && (
+      <>
+        <path d="M36 68 L38 134 L62 134 L64 68 Z" />
+        <path d="M29 62 V42 H38 V50 H45.5 V42 H54.5 V50 H62 V42 H71 V62 Z" />
+        <rect x="31" y="61" width="38" height="8" rx="2.5" />
+      </>
+    )}
+    <path d="M24 138 H76 Q81 138 81 143 V147 H19 V143 Q19 138 24 138 Z" />
+    <rect x="15" y="147" width="70" height="12" rx="4" />
+  </g>
+</svg>

@@ -1,0 +1,86 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Devices from '../../components/Devices.astro';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+  return projects.map((project, i) => ({
+    params: { id: project.id },
+    props: { project, next: projects[(i + 1) % projects.length], index: i, total: projects.length },
+  }));
+}
+
+const { project, next, index, total } = Astro.props;
+const d = project.data;
+const { Content } = await render(project);
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+<Base title={d.title} description={d.summary}>
+  <section class="p-head">
+    <div class="wrap">
+      <a class="back mono link-line" href={url('/projects/')}>← All projects</a>
+      <p class="square-tag" data-reveal>Project {pad(index + 1)} / {pad(total)} — {d.category}</p>
+      <h1 class="display" data-split><span class="gold">{d.title}</span></h1>
+      <p class="lead" data-reveal>{d.summary}</p>
+      {d.sample && <p class="sample-badge" data-reveal>Sample entry — replace with your own project</p>}
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class={`p-stage acc-${d.accent}`} data-reveal data-tilt-host data-cursor="Move">
+      <Devices title={d.title} accent={d.accent} desktopImage={d.desktopImage} mobileImage={d.mobileImage} size="lg" />
+    </div>
+  </section>
+
+  <section class="wrap p-body">
+    <aside class="p-meta" data-reveal>
+      <dl>
+        <div><dt>Year</dt><dd>{d.year}</dd></div>
+        <div><dt>Role</dt><dd>{d.role}</dd></div>
+        <div><dt>Category</dt><dd>{d.category}</dd></div>
+        <div><dt>Stack</dt><dd><ul class="chips">{d.tech.map((t) => <li class="chip">{t}</li>)}</ul></dd></div>
+      </dl>
+      <div class="p-links">
+        {d.demo && <a class="btn" href={d.demo} target="_blank" rel="noopener" data-magnetic>Live demo <span class="arrow">→</span></a>}
+        {d.github && <a class="btn ghost" href={d.github} target="_blank" rel="noopener" data-magnetic>View code</a>}
+      </div>
+    </aside>
+    <article class="prose" data-reveal>
+      <Content />
+    </article>
+  </section>
+
+  <a class="next dark wine" href={url(`/projects/${next.id}/`)} data-cursor="Next">
+    <div class="wrap next-inner">
+      <span class="square-tag">Next move</span>
+      <span class="display gold">{next.data.title}</span>
+      <span class="mono">{next.data.category} · {next.data.year} →</span>
+    </div>
+  </a>
+</Base>
+
+<style>
+  .p-head { padding: clamp(130px, 16vw, 190px) 0 clamp(36px, 5vw, 60px); }
+  .p-head .wrap { display: grid; gap: 1.2rem; justify-items: start; }
+  .back { color: var(--ink-soft); margin-bottom: 1.6rem; }
+  .p-head .display { font-size: clamp(3.2rem, 9vw, 8.6rem); }
+  .p-stage { border-radius: 22px; padding: 6% 8% 4%; background: #D9C9C0; }
+  .p-stage.acc-blue { background: #C3D0D8; }
+  .p-stage.acc-espresso { background: #CFC6B4; }
+  .p-stage.acc-mocha { background: #D7CDBA; }
+  .p-body { display: grid; grid-template-columns: 320px 1fr; gap: clamp(32px, 6vw, 100px); padding-top: clamp(60px, 8vw, 110px); padding-bottom: clamp(90px, 12vw, 160px); align-items: start; }
+  .p-meta { position: sticky; top: 110px; display: grid; gap: 2rem; }
+  dl { margin: 0; display: grid; gap: 1.2rem; }
+  dl div { display: grid; gap: .35rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--line); }
+  dt { font-family: var(--mono); font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; color: var(--burgundy); }
+  dd { margin: 0; font-size: 1rem; }
+  .p-links { display: flex; flex-wrap: wrap; gap: .6rem; }
+  @media (max-width: 860px) { .p-body { grid-template-columns: 1fr; } .p-meta { position: static; } }
+  .next { display: block; position: relative; z-index: 2; padding: clamp(80px, 11vw, 150px) 0; }
+  .next-inner { display: grid; gap: 1rem; justify-items: start; }
+  .next .display { font-size: clamp(3rem, 9vw, 8rem); transition: letter-spacing .8s var(--ease); }
+  .next:hover .display { letter-spacing: .01em; }
+  .next .mono { color: var(--ink-soft); }
+</style>

@@ -1,0 +1,39 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const categories = [...new Set(projects.map((p) => p.data.category))];
+---
+<Base title="Projects" description="Selected computer-science projects, each with its own case study.">
+  <PageHead tag="c3 — Work" title="Selected" accent="work." lead="Every project is a case study: the problem, the moves I made, and how the game ended.">
+    <div class="filters" data-filter-group="#project-grid" data-reveal role="group" aria-label="Filter projects">
+      <button type="button" data-filter="all" aria-pressed="true">All <sup>{projects.length}</sup></button>
+      {categories.map((c) => (
+        <button type="button" data-filter={c} aria-pressed="false">{c} <sup>{projects.filter((p) => p.data.category === c).length}</sup></button>
+      ))}
+    </div>
+  </PageHead>
+
+  <section class="wrap grid-wrap">
+    <div class="grid" id="project-grid">
+      {projects.map((p, i) => <ProjectCard project={p} index={i} />)}
+    </div>
+  </section>
+</Base>
+
+<style is:global>
+  .filters { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 2.2rem; }
+  .filters button { padding: .6em 1.15em; border-radius: 999px; border: 1px solid var(--line); font-size: .9rem; transition: background .4s var(--ease), color .4s; }
+  .filters button sup { font-family: var(--mono); font-size: .6rem; opacity: .6; }
+  .filters button:hover { border-color: var(--espresso); }
+  .filters button[aria-pressed='true'] { background: var(--espresso); color: var(--beige); border-color: var(--espresso); }
+</style>
+<style>
+  .grid-wrap { padding-bottom: clamp(90px, 12vw, 160px); }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(48px, 6vw, 90px) clamp(24px, 4vw, 56px); }
+  .grid > :global(:nth-child(even)) { margin-top: clamp(0px, 8vw, 120px); }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } .grid > :global(:nth-child(even)) { margin-top: 0; } }
+</style>

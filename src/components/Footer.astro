@@ -1,0 +1,48 @@
+---
+import { site, nav } from '../data/site';
+import { url } from '../lib/url';
+const year = new Date().getFullYear();
+---
+<footer class="site-footer dark">
+  <div class="wrap">
+    <div class="cta">
+      <p class="square-tag">h8 — Endgame</p>
+      <h2 class="display" data-split><span class="gold">Your move.</span></h2>
+      <p class="lead">Have an internship, a project or a question? I'd love to hear about it.</p>
+      <div class="cta-actions">
+        <a class="btn" href={url('/contact/')} data-magnetic>Start a conversation <span class="arrow" aria-hidden="true">→</span></a>
+        <a class="btn ghost" href={`mailto:${site.email}`} data-magnetic>{site.email}</a>
+      </div>
+    </div>
+    <hr class="rule" />
+    <div class="cols">
+      <p class="sig"><span class="script gold">{site.name}</span></p>
+      <nav aria-label="Footer" class="fnav">
+        {nav.map((n) => <a href={url(n.href)} class="link-line">{n.label}</a>)}
+      </nav>
+      <div class="social">
+        <a href={site.github} class="link-line" target="_blank" rel="noopener">GitHub</a>
+        <a href={site.linkedin} class="link-line" target="_blank" rel="noopener">LinkedIn</a>
+        <a href={`mailto:${site.email}`} class="link-line">Email</a>
+      </div>
+    </div>
+    <div class="base mono">
+      <span>© {year} {site.name}</span>
+      <span>Built with Astro &amp; GSAP</span>
+      <a href="#top" class="link-line" data-to-top>Back to top ↑</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer { position: relative; z-index: 2; padding: clamp(90px, 12vw, 160px) 0 32px; overflow: hidden; }
+  .cta { display: grid; gap: 1.4rem; justify-items: start; margin-bottom: clamp(60px, 8vw, 110px); }
+  .cta .display { font-size: clamp(4rem, 13vw, 12rem); line-height: .9; }
+  .cta-actions { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: .6rem; }
+  .cols { display: grid; grid-template-columns: 1.4fr 1fr auto; gap: 2rem; padding: 48px 0; align-items: start; }
+  .sig { margin: 0; font-size: clamp(2.6rem, 5vw, 4rem); line-height: 1.1; }
+  .fnav, .social { display: grid; gap: .5rem; justify-items: start; color: var(--ink-soft); }
+  .fnav a:hover, .social a:hover { color: var(--ink); }
+  .base { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; color: var(--ink-soft); font-size: .68rem; }
+  @media (max-width: 760px) { .cols { grid-template-columns: 1fr 1fr; } .sig { grid-column: 1 / -1; } }
+</style>

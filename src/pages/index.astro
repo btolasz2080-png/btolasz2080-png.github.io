@@ -1,0 +1,208 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import ChessStage from '../components/ChessStage.astro';
+import FolderStack from '../components/FolderStack.astro';
+import Devices from '../components/Devices.astro';
+import CertificatePaper from '../components/CertificatePaper.astro';
+import { site } from '../data/site';
+import { skillGroups } from '../data/skills';
+import { url, formatDate } from '../lib/url';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const featured = projects.filter((p) => p.data.featured).slice(0, 3);
+const courses = await getCollection('courses');
+const certs = (await getCollection('certificates')).sort((a, b) => +b.data.issued - +a.data.issued);
+const allSkills = skillGroups.flatMap((g) => g.items);
+const pad = (n: number) => String(n).padStart(2, '0');
+
+// Turn "*word*" into the burgundy italic accent
+const headline = site.headline.map((line) =>
+  line.split(/(\*[^*]+\*)/).map((part) => (part.startsWith('*') ? { accent: true, text: part.slice(1, -1) } : { accent: false, text: part })),
+);
+
+const folders = [
+  { label: 'Projects', href: '/projects/', color: 'mocha', meta: `${pad(projects.length)} files`, teaser: 'Case studies of the things I have designed and built.' },
+  { label: 'Courses', href: '/courses/', color: 'blue', meta: `${pad(courses.length)} files`, teaser: 'Cisco, Coursera and more — every course in its own folder.' },
+  { label: 'Certificates', href: '/certificates/', color: 'burgundy', meta: `${pad(certs.length)} files`, teaser: 'Verified credentials, each with its own detail page.' },
+  { label: 'Skills', href: '/skills/', color: 'paper', meta: `${pad(allSkills.length)} entries`, teaser: 'The languages, tools and strengths on my board.' },
+  { label: 'About me', href: '/about/', color: 'espresso', meta: 'Profile', teaser: 'The story, the timeline and the person behind the code.' },
+] as const;
+---
+<Base>
+  <!-- ───────────── HERO ───────────── -->
+  <section class="hero" data-hero>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow" data-hero-in>{site.eyebrow.join(' · ')}</p>
+        <h1 class="display hero-title" data-hero-split>
+          {headline.map((parts) => (
+            <span class="hl-line">{parts.map((p) => (p.accent ? <span class="accent">{p.text}</span> : <span class="gold">{p.text}</span>))}</span>
+          ))}
+        </h1>
+        <p class="lead hero-intro" data-hero-in>
+          I'm <strong>{site.name}</strong>. {site.intro}
+        </p>
+        <div class="hero-actions" data-hero-in>
+          <a class="btn" href={url('/projects/')} data-magnetic>See my work <span class="arrow" aria-hidden="true">→</span></a>
+          <a class="btn ghost" href={url(site.cv)} data-magnetic download>Download CV</a>
+        </div>
+        <p class="hero-status mono" data-hero-in><span class="live"></span>{site.availability}</p>
+      </div>
+      <div class="hero-board">
+        <ChessStage />
+      </div>
+    </div>
+
+    <div class="wrap stats" data-hero-in>
+      <div><strong data-count={projects.length}>{pad(projects.length)}</strong><span>Projects</span></div>
+      <div><strong data-count={courses.length}>{pad(courses.length)}</strong><span>Courses</span></div>
+      <div><strong data-count={certs.length}>{pad(certs.length)}</strong><span>Certificates</span></div>
+      <div><strong data-count={allSkills.length}>{pad(allSkills.length)}</strong><span>Skills</span></div>
+    </div>
+  </section>
+
+  <!-- ───────────── THE ARCHIVE (folders) ───────────── -->
+  <section class="section archive">
+    <div class="wrap">
+      <div class="section-head split">
+        <div>
+          <p class="square-tag" data-reveal>a1 — The archive</p>
+          <h2 class="h2" data-split><span class="gold">Everything, filed</span> <span class="accent">neatly.</span></h2>
+        </div>
+        <p class="lead" data-reveal>Hover a folder to pull it out of the stack. Click to open it.</p>
+      </div>
+      <FolderStack items={[...folders]} />
+    </div>
+  </section>
+
+  <!-- ───────────── FEATURED WORK ───────────── -->
+  <section class="section featured">
+    <div class="wrap">
+      <div class="section-head split">
+        <div>
+          <p class="square-tag" data-reveal>c3 — Selected work</p>
+          <h2 class="h2" data-split><span class="gold">Opening moves.</span></h2>
+        </div>
+        <a class="btn ghost" href={url('/projects/')} data-reveal data-magnetic>All projects <span class="arrow" aria-hidden="true">→</span></a>
+      </div>
+
+      <div class="rows">
+        {featured.map((p, i) => (
+          <a class={`row ${i % 2 ? 'flip' : ''}`} href={url(`/projects/${p.id}/`)} data-cursor="View">
+            <div class="row-copy" data-reveal>
+              <span class="mono row-idx">{pad(i + 1)} / {p.data.category}</span>
+              <h3 class="h2 row-title">{p.data.title}</h3>
+              <p class="row-sum">{p.data.summary}</p>
+              <ul class="chips">{p.data.tech.map((t) => <li class="chip">{t}</li>)}</ul>
+              <span class="row-more mono">Read the case study →</span>
+            </div>
+            <div class={`row-stage acc-${p.data.accent}`} data-reveal>
+              <Devices title={p.data.title} accent={p.data.accent} desktopImage={p.data.desktopImage} mobileImage={p.data.mobileImage} size="lg" />
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────── SKILLS MARQUEE ───────────── -->
+  <section class="marquees" aria-label="Skills">
+    <div class="marquee" data-marquee="left">
+      <div class="marquee-track">
+        {[0, 1].map(() => allSkills.slice(0, 18).map((s) => <span class="mq-item gold">{s}<i aria-hidden="true">♛</i></span>))}
+      </div>
+    </div>
+    <div class="marquee alt" data-marquee="right">
+      <div class="marquee-track">
+        {[0, 1].map(() => allSkills.slice(12).concat(allSkills.slice(0, 6)).map((s) => <span class="mq-item">{s}<i aria-hidden="true">✦</i></span>))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────── CERTIFICATES ───────────── -->
+  <section class="section certs">
+    <div class="wrap">
+      <div class="section-head split">
+        <div>
+          <p class="square-tag" data-reveal>e5 — Credentials</p>
+          <h2 class="h2" data-split><span class="gold">Earned, and</span> <span class="accent">verified.</span></h2>
+        </div>
+        <a class="btn ghost" href={url('/certificates/')} data-reveal data-magnetic>All certificates <span class="arrow" aria-hidden="true">→</span></a>
+      </div>
+      <div class="cert-row">
+        {certs.slice(0, 3).map((c) => (
+          <a class="cert-card" href={url(`/certificates/${c.id}/`)} data-cursor="Verify" data-reveal>
+            <div data-tilt><CertificatePaper title={c.data.title} issuer={c.data.issuer} issued={c.data.issued} image={c.data.image} /></div>
+            <div class="cert-meta">
+              <span class="mono">{c.data.issuer}</span>
+              <h3 class="h3">{c.data.title}</h3>
+              <span class="mono muted">{formatDate(c.data.issued)}</span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero { position: relative; overflow-x: clip; min-height: 100svh; padding: 130px 0 40px; display: grid; align-content: center; gap: clamp(40px, 6vw, 70px); }
+  .hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(24px, 4vw, 64px); align-items: center; }
+  .hero-copy { display: grid; gap: 1.6rem; justify-items: start; }
+  .hero-title { font-size: clamp(3.4rem, 7.6vw, 7.6rem); }
+  .hl-line { display: block; }
+  .hero-intro { margin: 0; }
+  .hero-intro strong { color: var(--ink); font-weight: 600; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: .8rem; }
+  .hero-status { display: inline-flex; align-items: center; gap: .7em; color: var(--ink-soft); font-size: .7rem; margin: 0; }
+  .live { width: 8px; height: 8px; border-radius: 50%; background: #3F7A4F; box-shadow: 0 0 0 4px rgba(63, 122, 79, .18); }
+  .hero-board { position: relative; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); }
+  .stats div { display: grid; gap: .2rem; padding: 1.4rem 0 0; }
+  .stats div + div { padding-left: clamp(12px, 2vw, 28px); border-left: 1px solid var(--line); }
+  .stats strong { font-family: var(--serif); font-weight: 500; font-size: clamp(2.4rem, 4vw, 3.6rem); line-height: 1; color: var(--burgundy); }
+  .stats span { font-family: var(--mono); font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); }
+
+  @media (max-width: 900px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero-board { order: -1; margin: 0 -8px; }
+    .hero { padding-top: 96px; }
+    .stats { grid-template-columns: repeat(2, 1fr); row-gap: 1.2rem; }
+    .stats div:nth-child(3) { padding-left: 0; border-left: 0; }
+  }
+
+  .rows { display: grid; gap: clamp(70px, 10vw, 140px); }
+  .row { display: grid; grid-template-columns: .8fr 1.2fr; gap: clamp(28px, 5vw, 80px); align-items: center; }
+  .row.flip .row-copy { order: 2; }
+  .row-copy { display: grid; gap: 1.1rem; justify-items: start; }
+  .row-idx { color: var(--burgundy); }
+  .row-title { transition: color .4s; }
+  .row:hover .row-title { color: var(--burgundy); }
+  .row-sum { margin: 0; color: var(--ink-soft); font-size: 1.08rem; }
+  .row-more { color: var(--ink); border-bottom: 1px solid currentColor; padding-bottom: 2px; }
+  .row-stage { border-radius: 18px; padding: 7% 6% 5%; background: #D9C9C0; transition: background .7s var(--ease); }
+  .row-stage.acc-blue { background: #C3D0D8; }
+  .row-stage.acc-espresso { background: #CFC6B4; }
+  .row-stage.acc-mocha { background: #D7CDBA; }
+  .row:hover .row-stage { background: var(--blue); }
+  .row.flip:hover .row-stage { background: #D7C3B9; }
+  @media (max-width: 860px) { .row { grid-template-columns: 1fr; } .row.flip .row-copy { order: 0; } .row-stage { order: -1; } }
+
+  .marquees { padding: clamp(30px, 5vw, 60px) 0; overflow: hidden; display: grid; gap: .4rem; }
+  .marquee { overflow: hidden; white-space: nowrap; }
+  .marquee.alt { background: var(--espresso); color: var(--beige); padding: .5rem 0; transform: rotate(-1.5deg); margin: 0 -2vw; }
+  .marquee-track { display: inline-flex; will-change: transform; }
+  .mq-item { display: inline-flex; align-items: center; gap: .5em; font-family: var(--serif); font-size: clamp(2.2rem, 5vw, 4.4rem); line-height: 1.15; padding-right: .5em; }
+  .mq-item i { font-style: normal; font-size: .45em; color: var(--burgundy); -webkit-text-fill-color: var(--burgundy); }
+  .marquee.alt .mq-item { font-size: clamp(1.4rem, 2.6vw, 2.2rem); font-style: italic; }
+  .marquee.alt .mq-item i { color: var(--blue); -webkit-text-fill-color: var(--blue); }
+
+  .cert-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(18px, 3vw, 36px); }
+  .cert-card { display: grid; gap: 1.2rem; }
+  .cert-meta { display: grid; gap: .35rem; }
+  .cert-meta .mono { color: var(--burgundy); font-size: .68rem; }
+  .cert-meta .muted { color: var(--ink-soft); }
+  @media (max-width: 860px) { .cert-row { grid-template-columns: 1fr; max-width: 520px; } }
+</style>

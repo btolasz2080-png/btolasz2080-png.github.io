@@ -1,0 +1,269 @@
+/* ──────────────────────────────────────────────────────────────
+   DESIGN TOKENS — change a colour here and it changes everywhere
+   ────────────────────────────────────────────────────────────── */
+:root {
+  --beige: #E3DFCE;
+  --beige-2: #D8D3BE;
+  --paper: #ECE9DD;
+  --blue: #94B1C8;
+  --blue-2: #7E9DB6;
+  --burgundy: #4C050C;
+  --burgundy-2: #6B111B;
+  --espresso: #1A0905;
+  --mocha: #3A2119;
+
+  /* Gold "jewellery" type. Deeper stops on light paper for legibility. */
+  --gold-grad: linear-gradient(100deg, #6B4A12 0%, #9C7630 24%, #C9A55E 44%, #94702B 62%, #6F4E16 82%, #A88337 100%);
+  --gold-solid: #8E6B27;
+
+  --ink: var(--espresso);
+  --ink-soft: rgba(26, 9, 5, 0.72);
+  --line: rgba(26, 9, 5, 0.16);
+  --bg: var(--beige);
+
+  --serif: 'Cormorant Garamond', 'Cormorant', Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --script: 'Pinyon Script', 'Cormorant Garamond', cursive;
+
+  --gutter: clamp(16px, 4vw, 56px);
+  --max: 1320px;
+  --radius: 14px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Dark sections flip the ink and brighten the gold */
+.dark {
+  --ink: var(--beige);
+  --ink-soft: rgba(227, 223, 206, 0.7);
+  --line: rgba(227, 223, 206, 0.16);
+  --gold-grad: linear-gradient(100deg, #A27A33 0%, #D9BD7A 22%, #F4E3B0 42%, #C9A458 60%, #9C7630 80%, #E2C98A 100%);
+  --gold-solid: #D3B26C;
+  background: var(--espresso);
+  color: var(--ink);
+}
+.dark.wine { background: var(--burgundy); }
+
+/* ──────────────────────────────── base */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+/* Linen / paper grain like the colour-archive reference */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.45;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .1  0 0 0 0 .04  0 0 0 0 .02  0 0 0 .09 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+main, header, footer { position: relative; z-index: 2; }
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+::selection { background: var(--burgundy); color: var(--beige); }
+:focus-visible { outline: 2px solid var(--burgundy); outline-offset: 3px; border-radius: 4px; }
+.dark :focus-visible { outline-color: var(--blue); }
+
+.wrap { width: 100%; max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ──────────────────────────────── typography */
+.display {
+  font-family: var(--serif);
+  font-weight: 500;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  font-size: clamp(3rem, 7.4vw, 7.4rem);
+  margin: 0;
+}
+.h1 { font-family: var(--serif); font-weight: 500; line-height: 0.95; letter-spacing: -0.015em; font-size: clamp(2.8rem, 6vw, 5.8rem); margin: 0; }
+.h2 { font-family: var(--serif); font-weight: 500; line-height: 1; letter-spacing: -0.01em; font-size: clamp(2.1rem, 4vw, 3.6rem); margin: 0; }
+.h3 { font-family: var(--serif); font-weight: 600; line-height: 1.1; font-size: clamp(1.45rem, 2.2vw, 1.9rem); margin: 0; }
+.lead { font-size: clamp(1.05rem, 1.4vw, 1.2rem); color: var(--ink-soft); max-width: 36em; }
+
+.gold {
+  background: var(--gold-grad);
+  background-size: 220% 100%;
+  background-position: 0% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+/* SplitText wraps lines in new elements, so they need the gold too */
+.gold .line, .gold .word, .gold .char { background: inherit; background-size: inherit; -webkit-background-clip: text; background-clip: text; }
+.accent { font-style: italic; color: var(--burgundy); -webkit-text-fill-color: var(--burgundy); background: none; }
+.dark .accent { color: var(--blue); -webkit-text-fill-color: var(--blue); }
+.script { font-family: var(--script); font-weight: 400; letter-spacing: 0; }
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9em;
+  margin: 0;
+}
+.eyebrow::before { content: ''; width: 2.6em; height: 1px; background: currentColor; opacity: 0.7; }
+.eyebrow.no-line::before { display: none; }
+.mono { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* ──────────────────────────────── buttons & chips */
+.btn {
+  --btn-bg: var(--espresso);
+  --btn-fg: var(--beige);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7em;
+  padding: 0.95em 1.6em;
+  border-radius: 999px;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-weight: 500;
+  font-size: 0.95rem;
+  overflow: hidden;
+  isolation: isolate;
+  white-space: nowrap;
+}
+.btn::after { /* liquid fill on hover */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--burgundy);
+  border-radius: inherit;
+  transform: translateY(101%);
+  transition: transform 0.6s var(--ease);
+  z-index: -1;
+}
+.btn:hover::after { transform: translateY(0); }
+.btn .arrow { transition: transform 0.5s var(--ease); }
+.btn:hover .arrow { transform: translateX(4px) rotate(-45deg); }
+.btn.ghost { --btn-bg: transparent; --btn-fg: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+.btn.ghost:hover { --btn-fg: var(--beige); }
+.dark .btn { --btn-bg: var(--beige); --btn-fg: var(--espresso); }
+.dark .btn:hover { --btn-fg: var(--beige); }
+.dark .btn.ghost { --btn-bg: transparent; --btn-fg: var(--beige); }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3em 0.85em;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 0.45rem; padding: 0; margin: 0; list-style: none; }
+.sample-badge {
+  display: inline-flex; align-items: center; gap: .4em;
+  font-family: var(--mono); font-size: .66rem; letter-spacing: .14em; text-transform: uppercase;
+  padding: .3em .7em; border-radius: 4px;
+  background: rgba(148, 177, 200, .35); color: var(--espresso);
+}
+
+.link-line { position: relative; display: inline-block; }
+.link-line::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.55s var(--ease);
+}
+.link-line:hover::after, .link-line[aria-current='page']::after { transform: scaleX(1); transform-origin: left; }
+
+/* ──────────────────────────────── sections */
+.section { padding: clamp(72px, 11vw, 150px) 0; }
+.section-head { display: grid; gap: 1.1rem; margin-bottom: clamp(36px, 5vw, 64px); }
+.section-head.split { grid-template-columns: 1fr auto; align-items: end; }
+@media (max-width: 720px) { .section-head.split { grid-template-columns: 1fr; } }
+.square-tag { /* chess-coordinate label: "a1 — Work" */
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--burgundy);
+}
+.dark .square-tag { color: var(--blue); }
+.rule { height: 1px; background: var(--line); border: 0; margin: 0; transform-origin: left; }
+
+/* Page header used on inner pages */
+.page-head { padding: clamp(140px, 18vw, 210px) 0 clamp(40px, 6vw, 72px); }
+.page-head .h1 { margin: 1.2rem 0 1.4rem; }
+
+/* Markdown body ("prose") */
+.prose { max-width: 42rem; font-size: 1.08rem; }
+.prose h2 { font-family: var(--serif); font-weight: 500; font-size: clamp(1.9rem, 3vw, 2.5rem); line-height: 1.05; margin: 2.4em 0 0.6em; }
+.prose h2:first-child { margin-top: 0; }
+.prose p, .prose li { color: var(--ink-soft); }
+.prose strong { color: var(--ink); font-weight: 600; }
+.prose em { font-family: var(--serif); font-size: 1.15em; color: var(--burgundy); }
+.prose ul { padding-left: 1.1em; }
+.prose li::marker { color: var(--burgundy); }
+.prose a { color: var(--burgundy); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ──────────────────────────────── motion helpers (JS removes the hidden state) */
+.js [data-reveal] { opacity: 0; }
+.js [data-split] { visibility: hidden; }
+.split-line { overflow: clip; padding-bottom: 0.06em; margin-bottom: -0.06em; }
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] { opacity: 1; }
+  .js [data-split] { visibility: visible; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+/* ──────────────────────────────── custom cursor (desktop only) */
+.cursor, .cursor-ring { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9998; opacity: 0; }
+.cursor { width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--burgundy); }
+.cursor-ring {
+  width: 44px; height: 44px; margin: -22px 0 0 -22px;
+  border-radius: 50%;
+  border: 1px solid rgba(76, 5, 12, 0.45);
+  display: grid; place-items: center;
+}
+.cursor-ring span {
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--beige); opacity: 0; transform: scale(0.6);
+}
+.has-cursor .cursor, .has-cursor .cursor-ring { opacity: 1; }
+@media (pointer: coarse) { .cursor, .cursor-ring { display: none; } }
+
+/* ──────────────────────────────── page-transition chessboard */
+.pt {
+  position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+  display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr);
+}
+.pt i { display: block; transform: scaleY(0); background: var(--burgundy); }
+.pt i.alt { background: var(--espresso); }
+.pt-mark { position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center; pointer-events: none; opacity: 0; }
+.pt-mark svg { width: 68px; height: auto; }
+html.pt-enter .pt i { transform: scaleY(1); }
+html.pt-enter .pt-mark { opacity: 1; }
+html.pt-busy .pt { pointer-events: all; }
+
+[hidden] { display: none !important; }
+.js [data-hero-split] { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) { .js [data-hero-split] { visibility: visible; } }
+.js [data-hero-in] { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .js [data-hero-in] { opacity: 1; } }

@@ -1,0 +1,12 @@
+---
+interface Props { tag: string; title: string; accent?: string; lead?: string }
+const { tag, title, accent, lead } = Astro.props;
+---
+<section class="page-head">
+  <div class="wrap">
+    <p class="square-tag" data-reveal>{tag}</p>
+    <h1 class="h1" data-split><span class="gold">{title}</span>{accent && <> <span class="accent">{accent}</span></>}</h1>
+    {lead && <p class="lead" data-reveal>{lead}</p>}
+    <slot />
+  </div>
+</section>

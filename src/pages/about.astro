@@ -1,0 +1,102 @@
+---
+import Base from '../layouts/Base.astro';
+import Piece from '../components/Piece.astro';
+import Seal from '../components/Seal.astro';
+import { site } from '../data/site';
+import { url } from '../lib/url';
+---
+<Base title="About" description={`About ${site.name}.`}>
+  <section class="about-head">
+    <div class="wrap a-grid">
+      <div class="portrait" data-reveal>
+        <div class="frame" data-parallax="0.06">
+          <!-- Replace this block with <img src="/images/me.jpg" alt="..."> once you have a photo -->
+          <div class="placeholder" aria-hidden="true">
+            <span class="initials gold">{site.initials}</span>
+            <Piece type="queen" tone="gold" class="ph-queen" />
+          </div>
+        </div>
+        <div class="a-seal"><Seal /></div>
+      </div>
+      <div class="a-copy">
+        <p class="square-tag" data-reveal>f6 — About me</p>
+        <h1 class="h1" data-split><span class="gold">The player</span> <span class="accent">behind the board.</span></h1>
+        {site.about.story.map((p) => <p class="lead" data-reveal>{p}</p>)}
+        <div class="a-actions" data-reveal>
+          <a class="btn" href={url(site.cv)} download data-magnetic>Download CV <span class="arrow">→</span></a>
+          <a class="btn ghost" href={url('/contact/')} data-magnetic>Get in touch</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section dark timeline-sec">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="square-tag" data-reveal>g7 — Timeline</p>
+        <h2 class="h2" data-split><span class="gold">Move by move.</span></h2>
+      </div>
+      <ol class="timeline" data-timeline>
+        <span class="tl-line" aria-hidden="true"><span class="tl-fill" data-tl-fill></span></span>
+        {site.about.timeline.map((t) => (
+          <li class="tl-item" data-reveal>
+            <span class="tl-year">{t.year}</span>
+            <div><h3 class="h3">{t.title}</h3><p class="mono">{t.place}</p></div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap off">
+      <div>
+        <p class="square-tag" data-reveal>Off the board</p>
+        <h2 class="h2" data-split><span class="gold">When I'm not</span> <span class="accent">coding.</span></h2>
+      </div>
+      <ul class="interests">
+        {site.about.interests.map((i, n) => <li data-reveal><span class="mono">0{n + 1}</span>{i}</li>)}
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { gsap, reduceMotion } from '../scripts/motion';
+  const fill = document.querySelector('[data-tl-fill]');
+  if (fill && !reduceMotion) {
+    gsap.fromTo(fill, { scaleY: 0 }, { scaleY: 1, ease: 'none', transformOrigin: '50% 0%', scrollTrigger: { trigger: '[data-timeline]', start: 'top 70%', end: 'bottom 60%', scrub: true } });
+  }
+</script>
+
+<style>
+  .about-head { padding: clamp(130px, 16vw, 190px) 0 clamp(80px, 10vw, 130px); }
+  .a-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: clamp(32px, 6vw, 100px); align-items: start; }
+  .portrait { position: relative; position: sticky; top: 110px; }
+  .frame { border-radius: 999px 999px 12px 12px; overflow: hidden; aspect-ratio: 4 / 5; background: var(--burgundy); box-shadow: 0 0 0 1px rgba(201, 165, 94, .6), 0 40px 60px -30px rgba(26, 9, 5, .6); }
+  .frame img { width: 100%; height: 100%; object-fit: cover; }
+  .placeholder { height: 100%; display: grid; place-items: center; position: relative; background: repeating-conic-gradient(from 0deg, rgba(148, 177, 200, .14) 0 25%, transparent 0 50%) 0 0 / 25% 20%; }
+  .initials { font-family: var(--serif); font-size: clamp(5rem, 12vw, 9rem); line-height: 1; --gold-grad: linear-gradient(100deg, #A27A33, #F4E3B0 45%, #C9A458 60%, #9C7630); }
+  .placeholder :global(.ph-queen) { position: absolute; bottom: 8%; width: 18%; opacity: .9; }
+  .a-seal { position: absolute; right: -24px; bottom: 12%; }
+  .a-copy { display: grid; gap: 1.4rem; justify-items: start; }
+  .a-copy .lead { margin: 0; }
+  .a-actions { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: .8rem; }
+  @media (max-width: 860px) { .a-grid { grid-template-columns: 1fr; } .portrait { position: relative; top: 0; max-width: 420px; } .a-seal { right: 0; transform: scale(.8); } }
+
+  .timeline { position: relative; list-style: none; margin: 0; padding: 0 0 0 clamp(28px, 5vw, 60px); display: grid; gap: clamp(36px, 5vw, 60px); }
+  .tl-line { position: absolute; left: 0; top: 8px; bottom: 8px; width: 1px; background: var(--line); }
+  .tl-fill { position: absolute; inset: 0; background: linear-gradient(#E2C98A, #9C7630); transform-origin: top; }
+  .tl-item { position: relative; display: grid; grid-template-columns: 160px 1fr; gap: 1.5rem; align-items: baseline; }
+  .tl-item::before { content: ''; position: absolute; left: calc(clamp(28px, 5vw, 60px) * -1 - 6px); top: .7em; width: 13px; height: 13px; border-radius: 50%; background: var(--espresso); border: 1px solid #C9A458; }
+  .tl-year { font-family: var(--serif); font-size: clamp(2.4rem, 5vw, 4rem); line-height: 1; color: var(--blue); font-style: italic; }
+  .tl-item .mono { color: var(--ink-soft); margin: .4rem 0 0; }
+  @media (max-width: 600px) { .tl-item { grid-template-columns: 1fr; gap: .4rem; } }
+
+  .off { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 90px); align-items: start; }
+  .interests { list-style: none; margin: 0; padding: 0; }
+  .interests li { display: flex; gap: 1.4rem; align-items: baseline; padding: 1.2rem 0; border-bottom: 1px solid var(--line); font-family: var(--serif); font-size: clamp(1.5rem, 2.6vw, 2.1rem); transition: padding .5s var(--ease), color .4s; }
+  .interests li:hover { padding-left: 1rem; color: var(--burgundy); }
+  .interests .mono { color: var(--burgundy); }
+  @media (max-width: 760px) { .off { grid-template-columns: 1fr; } }
+</style>

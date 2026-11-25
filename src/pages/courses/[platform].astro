@@ -1,0 +1,100 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { platforms, url, formatDate, type PlatformKey } from '../../lib/url';
+
+export async function getStaticPaths() {
+  return (Object.keys(platforms) as PlatformKey[]).map((platform) => ({ params: { platform } }));
+}
+
+const platform = Astro.params.platform as PlatformKey;
+const info = platforms[platform];
+const courses = (await getCollection('courses'))
+  .filter((c) => c.data.platform === platform)
+  .sort((a, b) => +b.data.completed - +a.data.completed);
+const certIds = new Set((await getCollection('certificates')).map((c) => c.id));
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+<Base title={`${info.label} courses`} description={`Courses I completed on ${info.long}.`}>
+  <section class="page-head">
+    <div class="wrap">
+      <a class="back mono link-line" href={url('/courses/')}>← All folders</a>
+      <p class="square-tag" data-reveal>{info.code} — {info.long}</p>
+      <h1 class="h1" data-split><span class="gold">{info.label}</span> <span class="accent">courses.</span></h1>
+      <p class="lead" data-reveal>{pad(courses.length)} {courses.length === 1 ? 'course' : 'courses'} in this folder, newest first.</p>
+    </div>
+  </section>
+
+  <section class="wrap cabinet">
+    <nav class="dividers" aria-label="Course platforms" data-reveal>
+      {(Object.keys(platforms) as PlatformKey[]).map((k) => (
+        <a href={url(`/courses/${k}/`)} class={`divider f-${platforms[k].folder}`} aria-current={k === platform ? 'page' : undefined}>
+          {platforms[k].label}
+        </a>
+      ))}
+    </nav>
+    <div class={`drawer f-${info.folder}`}>
+      {courses.length === 0 && <p class="empty">No courses filed here yet.</p>}
+      <ol class="cards">
+        {courses.map((c, i) => (
+          <li class="card" data-reveal>
+            <span class="card-no mono">{pad(i + 1)}</span>
+            <div class="card-main">
+              <h2 class="h3">{c.data.title}</h2>
+              <p class="card-prov">{c.data.provider}</p>
+              {c.body && <p class="card-desc">{c.body.trim()}</p>}
+              <ul class="chips">{c.data.topics.map((t) => <li class="chip">{t}</li>)}</ul>
+            </div>
+            <dl class="card-side">
+              <div><dt>Completed</dt><dd>{formatDate(c.data.completed)}</dd></div>
+              {c.data.hours && <div><dt>Hours</dt><dd>{c.data.hours}</dd></div>}
+              {c.data.certificate && certIds.has(c.data.certificate) && (
+                <a class="cert-link mono link-line" href={url(`/certificates/${c.data.certificate}/`)} data-cursor="Open">Certificate →</a>
+              )}
+              {c.data.link && <a class="cert-link mono link-line" href={c.data.link} target="_blank" rel="noopener">Course page ↗</a>}
+              {c.data.sample && <span class="sample-badge">Sample</span>}
+            </dl>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .back { color: var(--ink-soft); display: inline-block; margin-bottom: 1.6rem; }
+  .cabinet { padding-bottom: clamp(90px, 12vw, 160px); }
+  .f-mocha { --fbg: var(--mocha); --fink: var(--beige); }
+  .f-blue { --fbg: var(--blue); --fink: var(--espresso); }
+  .f-burgundy { --fbg: var(--burgundy); --fink: var(--beige); }
+  .dividers { display: flex; gap: 6px; padding-left: 4%; overflow-x: auto; }
+  .divider {
+    padding: .85rem 2.2rem .75rem; background: var(--fbg); color: var(--fink);
+    clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%); border-radius: 10px 10px 0 0;
+    font-size: .78rem; letter-spacing: .16em; text-transform: uppercase; font-weight: 500; white-space: nowrap;
+    opacity: .55; transform: translateY(8px); transition: opacity .4s, transform .5s var(--ease);
+  }
+  .divider:hover { opacity: .9; transform: translateY(2px); }
+  .divider[aria-current='page'] { opacity: 1; transform: none; }
+  .drawer { background: var(--fbg); color: var(--fink); border-radius: 8px; padding: clamp(16px, 3vw, 40px); }
+  .cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+  .card {
+    display: grid; grid-template-columns: auto 1fr 200px; gap: clamp(14px, 3vw, 40px);
+    background: var(--paper); color: var(--espresso); border-radius: 6px; padding: clamp(18px, 3vw, 34px);
+    box-shadow: 0 10px 24px -16px rgba(26, 9, 5, .6);
+    transition: translate .6s var(--ease), rotate .6s var(--ease), box-shadow .6s var(--ease);
+    --ink: var(--espresso); --ink-soft: rgba(26, 9, 5, .7); --line: rgba(26, 9, 5, .16);
+  }
+  .card:hover { translate: 0 -6px; rotate: -.4deg; box-shadow: 0 26px 40px -20px rgba(26, 9, 5, .6); }
+  .card-no { color: var(--burgundy); padding-top: .4rem; }
+  .card-main { display: grid; gap: .5rem; justify-items: start; }
+  .card-prov { margin: 0; font-family: var(--mono); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--burgundy); }
+  .card-desc { margin: 0 0 .4rem; color: var(--ink-soft); }
+  .card-side { margin: 0; display: grid; gap: .8rem; align-content: start; justify-items: start; }
+  .card-side div { display: grid; }
+  dt { font-family: var(--mono); font-size: .64rem; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); }
+  dd { margin: 0; font-family: var(--serif); font-size: 1.3rem; }
+  .cert-link { font-size: .72rem; color: var(--burgundy); }
+  .empty { margin: 0; padding: 2rem; font-family: var(--serif); font-size: 1.6rem; }
+  @media (max-width: 760px) { .card { grid-template-columns: 1fr; } .card-side { display: flex; flex-wrap: wrap; gap: 1rem 1.6rem; align-items: end; } .dividers { padding-left: 0; } .divider { padding: .75rem 1.3rem .65rem; } }
+</style>

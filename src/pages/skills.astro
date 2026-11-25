@@ -1,0 +1,83 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import { skillGroups } from '../data/skills';
+import { url } from '../lib/url';
+
+const projects = await getCollection('projects');
+const usedIn = (skill: string) => projects.filter((p) => p.data.tech.some((t) => t.toLowerCase() === skill.toLowerCase()));
+---
+<Base title="Skills" description="Languages, frameworks, tools and strengths — linked to the projects that use them.">
+  <PageHead tag="d4 — The board" title="Skills &" accent="technologies." lead="Every skill is a square on my board. Burgundy squares are already in play — hover one to see the projects where I used it." />
+
+  <section class="wrap board-wrap">
+    <p class="legend mono" data-reveal><i class="k-used"></i> Used in a project <i class="k-learn"></i> Studied / practised</p>
+    {skillGroups.map((g, gi) => (
+      <div class="group">
+        <header class="g-head" data-reveal>
+          <span class="g-file">{g.code}</span>
+          <h2 class="h2"><span class="gold">{g.name}</span></h2>
+          <span class="mono g-count">{String(g.items.length).padStart(2, '0')} squares</span>
+        </header>
+        <ul class="squares" data-skill-board>
+          {g.items.map((s, i) => {
+            const used = usedIn(s);
+            return (
+              <li class={`sq ${used.length ? 'used' : (i + gi) % 2 ? 'lt' : 'pp'}`} tabindex="0">
+                <span class="sq-coord mono">{g.code}{i + 1}</span>
+                <span class="sq-name">{s}</span>
+                {used.length > 0 && (
+                  <span class="sq-proj">
+                    {used.map((p) => <a href={url(`/projects/${p.id}/`)}>{p.data.title} →</a>)}
+                  </span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    ))}
+  </section>
+</Base>
+
+<script>
+  import { gsap, reduceMotion } from '../scripts/motion';
+  if (!reduceMotion) {
+    document.querySelectorAll('[data-skill-board]').forEach((board) => {
+      gsap.fromTo(board.children, { rotationX: -80, y: 30, opacity: 0, transformPerspective: 700, transformOrigin: '50% 0%' }, {
+        rotationX: 0, y: 0, opacity: 1, clearProps: 'transform',
+        duration: 0.9, ease: 'power3.out', stagger: { each: 0.05, from: 'start' },
+        scrollTrigger: { trigger: board, start: 'top 88%', once: true },
+      });
+    });
+  }
+</script>
+
+<style>
+  .board-wrap { padding-bottom: clamp(90px, 12vw, 160px); display: grid; gap: clamp(48px, 7vw, 90px); }
+  .legend { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; color: var(--ink-soft); margin: 0; }
+  .legend i { width: 14px; height: 14px; display: inline-block; border-radius: 2px; }
+  .k-used { background: var(--burgundy); }
+  .k-learn { background: var(--blue); margin-left: .8rem; }
+  .g-head { display: grid; grid-template-columns: auto 1fr auto; gap: 1.2rem; align-items: baseline; border-bottom: 1px solid var(--line); padding-bottom: 1rem; margin-bottom: 1.4rem; }
+  .g-file { font-family: var(--serif); font-style: italic; font-size: 2.4rem; line-height: 1; color: var(--burgundy); }
+  .g-count { color: var(--ink-soft); }
+  .squares { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(160px, 42vw), 1fr)); gap: 6px; }
+  .sq {
+    position: relative; aspect-ratio: 1; padding: 14px; border-radius: 4px;
+    display: flex; flex-direction: column; justify-content: flex-end; gap: .4rem;
+    background: var(--paper); color: var(--espresso); overflow: hidden;
+    transition: translate .5s var(--ease), box-shadow .5s var(--ease);
+  }
+  .sq.lt { background: var(--blue); }
+  .sq.used { background: var(--burgundy); color: var(--beige); }
+  .sq:hover, .sq:focus-within, .sq:focus { translate: 0 -8px; box-shadow: 0 22px 30px -18px rgba(26, 9, 5, .6); z-index: 1; }
+  .sq-coord { position: absolute; top: 12px; left: 14px; font-size: .62rem; opacity: .6; }
+  .sq-name { font-family: var(--serif); font-size: clamp(1.25rem, 2vw, 1.6rem); line-height: 1.05; font-weight: 500; }
+  .sq-proj { display: grid; gap: .15rem; font-size: .78rem; max-height: 0; opacity: 0; transition: max-height .6s var(--ease), opacity .4s; }
+  .sq-proj a { color: #E9D29A; }
+  .sq-proj a:hover { text-decoration: underline; }
+  .sq.used:hover .sq-proj, .sq.used:focus-within .sq-proj, .sq.used:focus .sq-proj { max-height: 6em; opacity: 1; }
+  @media (hover: none) { .sq-proj { max-height: none; opacity: 1; } }
+</style>

@@ -1,0 +1,37 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Devices from './Devices.astro';
+import { url } from '../lib/url';
+interface Props { project: CollectionEntry<'projects'>; index: number }
+const { project, index } = Astro.props;
+const d = project.data;
+---
+<article class="pcard" data-category={d.category} data-flip-item>
+  <a href={url(`/projects/${project.id}/`)} class="pcard-link" data-cursor="View">
+    <div class={`pcard-stage acc-${d.accent}`}>
+      <Devices title={d.title} accent={d.accent} desktopImage={d.desktopImage} mobileImage={d.mobileImage} />
+    </div>
+    <div class="pcard-meta">
+      <span class="mono idx">{String(index + 1).padStart(2, '0')}</span>
+      <h3 class="h3">{d.title}</h3>
+      <span class="mono yr">{d.year}</span>
+    </div>
+    <p class="pcard-sum">{d.summary}</p>
+    <ul class="chips">{d.tech.slice(0, 4).map((t) => <li class="chip">{t}</li>)}</ul>
+  </a>
+</article>
+
+<style>
+  .pcard-link { display: grid; gap: 1rem; }
+  .pcard-stage { border-radius: var(--radius); padding: 8% 7% 6%; background: var(--beige-2); overflow: hidden; transition: background .6s var(--ease); }
+  .pcard-stage.acc-burgundy { background: #D9C9C0; }
+  .pcard-stage.acc-blue { background: #C9D3D6; }
+  .pcard-stage.acc-espresso { background: #CFC6B4; }
+  .pcard-stage.acc-mocha { background: #D7CDBA; }
+  .pcard-link:hover .pcard-stage { background: var(--blue); }
+  .pcard-meta { display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+  .idx, .yr { color: var(--ink-soft); }
+  .pcard-meta .h3 { transition: color .4s; }
+  .pcard-link:hover .h3 { color: var(--burgundy); }
+  .pcard-sum { margin: 0; color: var(--ink-soft); max-width: 38em; }
+</style>

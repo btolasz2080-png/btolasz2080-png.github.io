@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+import { site } from '../data/site';
+---
+<Base title="Contact" description={`Get in touch with ${site.name}.`} footer={false} darkHeader>
+  <section class="contact dark">
+    <div class="wrap c-grid">
+      <div class="c-left">
+        <p class="square-tag" data-reveal>h8 — Contact</p>
+        <h1 class="display" data-split><span class="gold">Your move.</span></h1>
+        <p class="lead" data-reveal>{site.availability}. Send a message and I'll reply within a couple of days.</p>
+        <ul class="direct" data-reveal>
+          <li><span class="mono">Email</span><a class="link-line" href={`mailto:${site.email}`}>{site.email}</a></li>
+          <li><span class="mono">LinkedIn</span><a class="link-line" href={site.linkedin} target="_blank" rel="noopener">{site.linkedin.replace(/^https?:\/\/(www\.)?/, '')}</a></li>
+          <li><span class="mono">GitHub</span><a class="link-line" href={site.github} target="_blank" rel="noopener">{site.github.replace(/^https?:\/\//, '')}</a></li>
+          <li><span class="mono">Based in</span><span>{site.location}</span></li>
+        </ul>
+      </div>
+      <form class="form" data-contact-form data-reveal action={site.formEndpoint || undefined} method="post">
+        <label><span class="mono">Your name</span><input name="name" required autocomplete="name" /></label>
+        <label><span class="mono">Email</span><input name="email" type="email" required autocomplete="email" /></label>
+        <label><span class="mono">What's on your mind?</span><textarea name="message" rows="5" required></textarea></label>
+        <button class="btn" type="submit" data-magnetic>Send message <span class="arrow">→</span></button>
+        <p class="status mono" data-status role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .contact { min-height: 100svh; padding: clamp(130px, 16vw, 190px) 0 clamp(70px, 9vw, 120px); position: relative; z-index: 2; }
+  .c-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(40px, 7vw, 110px); align-items: start; }
+  .c-left { display: grid; gap: 1.6rem; }
+  .c-left .display { font-size: clamp(4rem, 11vw, 10rem); }
+  .direct { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; }
+  .direct li { display: grid; grid-template-columns: 110px 1fr; gap: 1rem; padding: .9rem 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+  .direct .mono { color: var(--blue); font-size: .68rem; padding-top: .3em; }
+  .form { display: grid; gap: 1.6rem; padding: clamp(24px, 4vw, 44px); border-radius: 14px; background: rgba(227, 223, 206, .05); box-shadow: inset 0 0 0 1px var(--line); }
+  label { display: grid; gap: .5rem; }
+  label .mono { color: var(--ink-soft); font-size: .68rem; }
+  input, textarea { font: inherit; color: var(--beige); background: transparent; border: 0; border-bottom: 1px solid var(--line); padding: .6rem 0; resize: vertical; transition: border-color .4s; border-radius: 0; }
+  input:focus, textarea:focus { outline: none; border-bottom-color: #D3B26C; }
+  .form .btn { justify-self: start; }
+  .status { margin: 0; color: var(--blue); min-height: 1.2em; }
+  @media (max-width: 860px) { .c-grid { grid-template-columns: 1fr; } .direct li { grid-template-columns: 1fr; gap: .2rem; } }
+</style>
