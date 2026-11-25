@@ -3,11 +3,15 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import PageHead from '../../components/PageHead.astro';
 import CertificatePaper from '../../components/CertificatePaper.astro';
-import { url, formatDate, platforms, type PlatformKey } from '../../lib/url';
+import { url, formatDate, type PlatformKey } from '../../lib/url';
+import { getFolders } from '../../lib/folders';
 import { addUrl } from '../../lib/admin';
 
 const certs = (await getCollection('certificates')).sort((a, b) => +b.data.issued - +a.data.issued);
-const used = (Object.keys(platforms) as PlatformKey[]).filter((k) => certs.some((c) => c.data.platform === k));
+const platforms = await getFolders();
+const label = (k: string) => platforms[k]?.label ?? k;
+const used = [...new Set(certs.map((c) => c.data.platform))] as PlatformKey[];
+const _unused = (Object.keys(platforms) as PlatformKey[]).filter((k) => certs.some((c) => c.data.platform === k));
 ---
 <Base title="Certificates" description="Verified certificates, each with its own detail page.">
   <PageHead tag="e5 — Credentials" title="Certificates" accent="& proof." lead="Every certificate links to its issuer so anyone can verify it.">
@@ -15,7 +19,7 @@ const used = (Object.keys(platforms) as PlatformKey[]).filter((k) => certs.some(
     <div class="filters" data-filter-group="#cert-grid" data-reveal role="group" aria-label="Filter certificates">
       <button type="button" data-filter="all" aria-pressed="true">All <sup>{certs.length}</sup></button>
       {used.map((k) => (
-        <button type="button" data-filter={k} aria-pressed="false">{platforms[k].label} <sup>{certs.filter((c) => c.data.platform === k).length}</sup></button>
+        <button type="button" data-filter={k} aria-pressed="false">{label(k)} <sup>{certs.filter((c) => c.data.platform === k).length}</sup></button>
       ))}
     </div>
   </PageHead>
@@ -26,7 +30,7 @@ const used = (Object.keys(platforms) as PlatformKey[]).filter((k) => certs.some(
           <a class="ccard" href={url(`/certificates/${c.id}/`)} data-cursor="Open">
             <div data-tilt><CertificatePaper title={c.data.title} issuer={c.data.issuer} issued={c.data.issued} image={c.data.image} /></div>
             <div class="ccard-meta">
-              <span class="mono">{platforms[c.data.platform].label} · {formatDate(c.data.issued)}</span>
+              <span class="mono">{label(c.data.platform)} · {formatDate(c.data.issued)}</span>
               <h2 class="h3">{c.data.title}</h2>
               <span class="issuer">{c.data.issuer}</span>
             </div>

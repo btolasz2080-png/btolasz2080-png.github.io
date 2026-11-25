@@ -40,10 +40,17 @@ topics: [Topic one, Topic two]
 ---
 One or two sentences about what the course covered.
 `,
+  folder: () => `---
+label: Folder Name
+long: Full name shown on the folder's page
+color: blue   # burgundy | blue | mocha | paper | espresso
+order: 10
+---
+`,
   certificate: () => `---
 title: Certificate Name
 issuer: Who issued it
-platform: cisco   # cisco | coursera | other
+platform: cisco   # the file name of a folder: cisco | coursera | other | ...
 issued: ${today()}
 credentialId: ABC-123
 verifyUrl: https://
@@ -54,11 +61,13 @@ skills: [Skill one, Skill two]
 `,
 };
 
-export const addUrl = {
+export const addUrl: Record<string, (...a: any[]) => string> = {
   project: () => newFile('src/content/projects', 'my-project.md', templates.project()),
-  cisco: () => newFile('src/content/courses', 'cisco-course-name.md', templates.course('cisco', 'Cisco Networking Academy')),
-  coursera: () => newFile('src/content/courses', 'coursera-course-name.md', templates.course('coursera', 'University or company')),
-  other: () => newFile('src/content/courses', 'course-name.md', templates.course('other', 'Platform name')),
+  course: (folder: string, provider = 'Provider name') => newFile('src/content/courses', `${folder}-course-name.md`, templates.course(folder, provider)),
+  cisco: () => addUrl.course('cisco', 'Cisco Networking Academy'),
+  coursera: () => addUrl.course('coursera', 'University or company'),
+  other: () => addUrl.course('other', 'Platform name'),
+  folder: () => newFile('src/content/folders', 'new-folder.md', templates.folder()),
   certificate: () => newFile('src/content/certificates', 'certificate-name.md', templates.certificate()),
   upload: (dir = 'public/images') => `https://github.com/${site.repo}/upload/main/${dir}`,
   editDetails: () => `https://github.com/${site.repo}/edit/main/src/data/site.ts`,

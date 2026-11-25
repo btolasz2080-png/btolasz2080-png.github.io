@@ -3,13 +3,13 @@
 //  (header, hero, footer, contact page) reads from here.
 // ─────────────────────────────────────────────────────────────
 export const site = {
-  name: 'Your Name',
-  firstName: 'Your',
-  initials: 'YN',
+  name: 'Albatool',
+  firstName: 'Albatool',
+  initials: 'BA',
   title: 'Computer Science Student',
 
   // The small line above the hero headline
-  eyebrow: ['Computer Science', 'Sophomore', 'Your University'],
+  eyebrow: ['Computer Science', 'Sophomore', 'Effat University'],
 
   // Hero headline. Wrap ONE word in *stars* to make it the burgundy italic accent.
   headline: ['Learning to build,', '*one move*', 'at a time.'],
@@ -18,7 +18,7 @@ export const site = {
     "I'm a computer science student at the start of my journey. This is where I file everything I learn — my Cisco and Coursera courses, my certificates, and the projects I build at college.",
 
   availability: 'Currently learning: networking, Python & web',
-  location: 'Your City',
+  location: 'Saudi Arabia',
 
   email: 'you@example.com',
   github: 'https://github.com/your-username',
@@ -40,9 +40,9 @@ export const site = {
       'This portfolio grows with me. Every course, certificate and project gets its own file here.',
     ],
     timeline: [
-      { year: '2025', title: 'Started B.Sc. Computer Science', place: 'Your University' },
+      { year: '2025', title: 'Started B.Sc. Computer Science', place: 'Effat University' },
       { year: '2025', title: 'First Cisco Networking Academy courses', place: 'Cisco' },
-      { year: '2026', title: 'Coursera courses & first college projects', place: 'Coursera · Your University' },
+      { year: '2026', title: 'Coursera courses & first college projects', place: 'Coursera · Effat University' },
     ],
     interests: ['Chess & strategy games', 'Design', 'Learning new tools', 'Problem solving'],
   },

@@ -3,10 +3,12 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import PageHead from '../../components/PageHead.astro';
 import FolderGrid from '../../components/FolderGrid.astro';
-import { platforms, formatDate, type PlatformKey } from '../../lib/url';
+import { formatDate, type PlatformKey } from '../../lib/url';
+import { getFolders } from '../../lib/folders';
 import { addUrl } from '../../lib/admin';
 
 const courses = await getCollection('courses');
+const platforms = await getFolders();
 const count = (k: PlatformKey) => courses.filter((c) => c.data.platform === k).length;
 const hours = courses.reduce((s, c) => s + (c.data.hours || 0), 0);
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -16,7 +18,7 @@ const items = (Object.keys(platforms) as PlatformKey[]).map((k) => ({
   href: `/courses/${k}/`,
   color: platforms[k].folder,
   meta: `${pad(count(k))} courses`,
-  addHref: addUrl[k](),
+  addHref: addUrl.course(k, platforms[k].long),
   addLabel: 'Add course',
   items: courses.filter((c) => c.data.platform === k).map((c) => ({ title: c.data.title, href: `/courses/${k}/`, meta: `${c.data.provider} · ${formatDate(c.data.completed)}` })),
 }));

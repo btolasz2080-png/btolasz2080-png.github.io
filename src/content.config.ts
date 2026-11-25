@@ -2,7 +2,18 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
-const platform = z.enum(['cisco', 'coursera', 'other']);
+// A course/certificate belongs to a folder: the file name of a folder in src/content/folders (e.g. cisco)
+const platform = z.string();
+
+const folders = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/folders' }),
+  schema: z.object({
+    label: z.string(),
+    long: z.string().optional(),
+    color: z.enum(['burgundy', 'blue', 'mocha', 'paper', 'espresso']).default('blue'),
+    order: z.number().default(50),
+  }),
+});
 
 const projects = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),
@@ -56,4 +67,4 @@ const certificates = defineCollection({
   }),
 });
 
-export const collections = { projects, courses, certificates };
+export const collections = { folders, projects, courses, certificates };

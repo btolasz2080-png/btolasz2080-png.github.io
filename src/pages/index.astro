@@ -6,7 +6,8 @@ import CertificatePaper from '../components/CertificatePaper.astro';
 import Seal from '../components/Seal.astro';
 import { site } from '../data/site';
 import { skillGroups } from '../data/skills';
-import { url, formatDate, platforms, type PlatformKey } from '../lib/url';
+import { url, formatDate, type PlatformKey } from '../lib/url';
+import { getFolders } from '../lib/folders';
 import { addUrl } from '../lib/admin';
 
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
@@ -19,20 +20,19 @@ const headline = site.headline.map((line) =>
   line.split(/(\*[^*]+\*)/).filter(Boolean).map((part) => (part.startsWith('*') ? { accent: true, text: part.slice(1, -1) } : { accent: false, text: part })),
 );
 
+const platforms = await getFolders();
 const courseFolder = (k: PlatformKey) => ({
   id: k,
   label: platforms[k].label,
   color: platforms[k].folder,
   href: `/courses/${k}/`,
-  addHref: addUrl[k](),
+  addHref: addUrl.course(k, platforms[k].long),
   addLabel: 'Add course',
   items: courses.filter((c) => c.data.platform === k).map((c) => ({ title: c.data.title, href: `/courses/${k}/`, meta: `${c.data.provider} · ${formatDate(c.data.completed)}` })),
 });
 
 const folders = [
-  courseFolder('cisco'),
-  courseFolder('coursera'),
-  courseFolder('other'),
+  ...Object.keys(platforms).map(courseFolder),
   {
     id: 'certificates', label: 'Certificates', color: 'paper', href: '/certificates/', addHref: addUrl.certificate(), addLabel: 'Add certificate',
     items: certs.map((c) => ({ title: c.data.title, href: `/certificates/${c.id}/`, meta: `${c.data.issuer} · ${formatDate(c.data.issued)}` })),
@@ -78,7 +78,10 @@ const folders = [
           <p class="square-tag" data-reveal>01 — My files</p>
           <h2 class="h2" data-split><span class="gold">Everything I learn,</span> <span class="accent">filed.</span></h2>
         </div>
-        <p class="lead" data-reveal>Click a folder to open it. The files drop down underneath.</p>
+        <div class="files-side">
+          <p class="lead" data-reveal>Click a folder to open it. The files drop down underneath.</p>
+          <a class="btn admin-only" href={addUrl.folder()} target="_blank" rel="noopener">+ New folder</a>
+        </div>
       </div>
       <FolderGrid items={folders as any} columns={5} />
     </div>
@@ -112,6 +115,7 @@ const folders = [
         </div>
         <a class="btn ghost" href={url('/certificates/')} data-reveal data-magnetic>All certificates <span class="arrow" aria-hidden="true">→</span></a>
       </div>
+      {certs.length === 0 && <p class="lead" data-reveal>My certificates are on their way — each one will have its own page and a verify link.</p>}
       <div class="cert-row">
         {certs.slice(0, 3).map((c) => (
           <a class="cert-card" href={url(`/certificates/${c.id}/`)} data-cursor="Open" data-reveal>
@@ -188,6 +192,7 @@ const folders = [
   .about-seal { position: absolute; right: -20px; top: -40px; opacity: .9; }
   @media (max-width: 860px) { .about-grid { grid-template-columns: 1fr; } .about-seal { display: none; } }
 
+  .files-side { display: grid; gap: .8rem; justify-items: start; }
   .cert-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(18px, 3vw, 36px); }
   .cert-card { display: grid; gap: 1.2rem; }
   .cert-meta { display: grid; gap: .35rem; }

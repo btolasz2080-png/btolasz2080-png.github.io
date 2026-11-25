@@ -2,7 +2,8 @@
 import { getCollection, getEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import CertificatePaper from '../../components/CertificatePaper.astro';
-import { url, formatDate, platforms } from '../../lib/url';
+import { url, formatDate } from '../../lib/url';
+import { getFolders } from '../../lib/folders';
 
 export async function getStaticPaths() {
   const certs = (await getCollection('certificates')).sort((a, b) => +b.data.issued - +a.data.issued);
@@ -10,6 +11,7 @@ export async function getStaticPaths() {
 }
 const { cert, next } = Astro.props;
 const d = cert.data;
+const platforms = await getFolders();
 const course = d.course ? await getEntry('courses', d.course) : undefined;
 ---
 <Base title={d.title} description={`${d.title} — issued by ${d.issuer}.`}>
@@ -17,7 +19,7 @@ const course = d.course ? await getEntry('courses', d.course) : undefined;
     <div class="wrap c-grid">
       <div class="c-copy">
         <a class="back mono link-line" href={url('/certificates/')}>← All certificates</a>
-        <p class="square-tag" data-reveal>{platforms[d.platform].long}</p>
+        <p class="square-tag" data-reveal>{platforms[d.platform]?.long ?? d.platform}</p>
         <h1 class="h1" data-split><span class="gold">{d.title}</span></h1>
         {d.sample && <p class="sample-badge" data-reveal>Sample entry — replace with your real certificate</p>}
         <dl class="c-meta" data-reveal>
