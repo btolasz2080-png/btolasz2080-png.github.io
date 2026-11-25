@@ -1,0 +1,147 @@
+---
+// Private "+ Add file" button. Hidden from visitors.
+// Turn it on once on your device by opening:  https://<your-site>/?admin=1
+// Turn it off with ?admin=0. It opens GitHub with a ready-to-fill file;
+// only you (the repository owner) can save it there.
+import { site } from '../data/site';
+
+const today = new Date().toISOString().slice(0, 10);
+const gh = (dir: string, filename: string, value: string) =>
+  `https://github.com/${site.repo}/new/main/${dir}?filename=${encodeURIComponent(filename)}&value=${encodeURIComponent(value)}`;
+
+const project = `---
+title: My New Project
+summary: One sentence about what it does and who it helps.
+year: ${new Date().getFullYear()}
+role: Developer
+category: Web   # Web | AI | Networking | Mobile | Other
+tech: [Python, React]
+# desktopImage: /images/my-project-desktop.png
+# mobileImage: /images/my-project-mobile.png
+github: https://github.com/
+# demo: https://
+featured: false
+order: 10
+accent: burgundy   # burgundy | blue | espresso | mocha
+---
+
+## The problem
+What problem were you solving?
+
+## The process
+How did you build it? What decisions did you make?
+
+## The result
+What happened, and what did you learn?
+`;
+
+const course = (platform: string, provider: string) => `---
+title: Course Name
+platform: ${platform}
+provider: ${provider}
+completed: ${today}
+hours: 20
+topics: [Topic one, Topic two]
+# certificate: file-name-of-the-certificate   (without .md)
+# link: https://
+---
+One or two sentences about what the course covered.
+`;
+
+const certificate = `---
+title: Certificate Name
+issuer: Who issued it
+platform: cisco   # cisco | coursera | other
+issued: ${today}
+credentialId: ABC-123
+verifyUrl: https://
+# image: /images/certs/my-certificate.jpg
+skills: [Skill one, Skill two]
+# course: file-name-of-the-course   (without .md)
+---
+`;
+
+const links = [
+  { group: 'Projects', items: [{ label: 'New project', href: gh('src/content/projects', 'my-new-project.md', project) }] },
+  {
+    group: 'Courses',
+    items: [
+      { label: 'New Cisco course', href: gh('src/content/courses', 'cisco-course-name.md', course('cisco', 'Cisco Networking Academy')) },
+      { label: 'New Coursera course', href: gh('src/content/courses', 'coursera-course-name.md', course('coursera', 'University or company name')) },
+      { label: 'New course (other platform)', href: gh('src/content/courses', 'course-name.md', course('other', 'Platform name')) },
+    ],
+  },
+  { group: 'Certificates', items: [{ label: 'New certificate', href: gh('src/content/certificates', 'certificate-name.md', certificate) }] },
+  {
+    group: 'Images & files',
+    items: [
+      { label: 'Upload screenshots / photos', href: `https://github.com/${site.repo}/upload/main/public/images` },
+      { label: 'Upload certificate images', href: `https://github.com/${site.repo}/upload/main/public/images/certs` },
+      { label: 'Upload CV (name it cv.pdf)', href: `https://github.com/${site.repo}/upload/main/public` },
+      { label: 'Edit my details', href: `https://github.com/${site.repo}/edit/main/src/data/site.ts` },
+    ],
+  },
+];
+---
+<div class="admin" data-admin hidden>
+  <div class="admin-panel" id="admin-panel" data-admin-panel hidden>
+    <p class="admin-title">Add to your portfolio</p>
+    {links.map((g) => (
+      <div class="admin-group">
+        <p class="mono">{g.group}</p>
+        {g.items.map((it) => <a href={it.href} target="_blank" rel="noopener">{it.label} <span aria-hidden="true">↗</span></a>)}
+      </div>
+    ))}
+    <p class="admin-note">Opens GitHub with a ready file. Fill it in and press <b>Commit changes</b>. The site updates itself in about 2 minutes.</p>
+  </div>
+  <button type="button" class="admin-btn" data-admin-btn aria-expanded="false" aria-controls="admin-panel">
+    <span class="plus" aria-hidden="true">+</span> Add file
+  </button>
+</div>
+
+<script is:inline>
+  (function () {
+    var on = false;
+    try {
+      var q = new URLSearchParams(location.search).get('admin');
+      if (q === '1') localStorage.setItem('portfolio-admin', '1');
+      if (q === '0') localStorage.removeItem('portfolio-admin');
+      on = localStorage.getItem('portfolio-admin') === '1';
+    } catch (e) {}
+    if (!on) return;
+    var root = document.querySelector('[data-admin]');
+    var btn = root.querySelector('[data-admin-btn]');
+    var panel = root.querySelector('[data-admin-panel]');
+    root.hidden = false;
+    btn.addEventListener('click', function () {
+      var open = btn.getAttribute('aria-expanded') !== 'true';
+      btn.setAttribute('aria-expanded', String(open));
+      panel.hidden = !open;
+    });
+  })();
+</script>
+
+<style>
+  .admin { position: fixed; right: 18px; bottom: 18px; z-index: 60; display: grid; justify-items: end; gap: 10px; }
+  .admin-btn {
+    display: inline-flex; align-items: center; gap: .55em; padding: .85em 1.3em; border-radius: 999px;
+    background: var(--burgundy); color: var(--beige); font-weight: 500; font-size: .9rem;
+    box-shadow: 0 14px 30px -10px rgba(76, 5, 12, .6), 0 0 0 1px rgba(201, 165, 94, .5);
+    transition: transform .4s var(--ease);
+  }
+  .admin-btn:hover { transform: translateY(-2px); }
+  .plus { font-size: 1.3em; line-height: 1; color: #E2C98A; transition: transform .4s var(--ease); }
+  .admin-btn[aria-expanded='true'] .plus { transform: rotate(45deg); }
+  .admin-panel {
+    width: min(320px, calc(100vw - 36px)); max-height: 70vh; overflow-y: auto;
+    background: var(--espresso); color: var(--beige); border-radius: 16px; padding: 18px;
+    box-shadow: 0 30px 60px -20px rgba(26, 9, 5, .7);
+    display: grid; gap: 14px;
+  }
+  .admin-title { margin: 0; font-family: var(--serif); font-size: 1.5rem; color: #E2C98A; }
+  .admin-group { display: grid; gap: 2px; }
+  .admin-group .mono { margin: 0 0 4px; font-size: .62rem; color: var(--blue); }
+  .admin-group a { display: flex; justify-content: space-between; padding: 7px 10px; border-radius: 8px; font-size: .9rem; }
+  .admin-group a:hover { background: rgba(227, 223, 206, .08); }
+  .admin-note { margin: 0; font-size: .78rem; color: rgba(227, 223, 206, .65); line-height: 1.5; }
+</style>

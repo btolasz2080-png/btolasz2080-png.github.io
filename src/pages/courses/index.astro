@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import PageHead from '../../components/PageHead.astro';
-import FolderStack from '../../components/FolderStack.astro';
+import FolderGrid from '../../components/FolderGrid.astro';
 import { platforms, type PlatformKey } from '../../lib/url';
 
 const courses = await getCollection('courses');
@@ -18,8 +18,9 @@ const items = (Object.keys(platforms) as PlatformKey[]).map((k) => ({
   label: platforms[k].label,
   href: `/courses/${k}/`,
   color: platforms[k].folder,
-  meta: `${platforms[k].code} · ${pad(count(k))} courses`,
+  meta: `${pad(count(k))} courses`,
   teaser: teasers[k],
+  papers: courses.filter((c) => c.data.platform === k).map((c) => c.data.title),
 }));
 ---
 <Base title="Courses" description="Every course I have completed, filed by learning platform.">
@@ -30,7 +31,7 @@ const items = (Object.keys(platforms) as PlatformKey[]).map((k) => ({
       <div><strong data-count={hours}>{hours}</strong><span>Learning hours</span></div>
       <div><strong data-count={3}>03</strong><span>Platforms</span></div>
     </div>
-    <FolderStack items={items as any} />
+    <FolderGrid items={items as any} columns={3} />
   </section>
 </Base>
 

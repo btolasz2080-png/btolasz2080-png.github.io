@@ -5,13 +5,13 @@ import { initCursor, initMagnetic, initTilt } from './pointer';
 import { initReveals, initCounters, initMarquees, initSeals, initHeader } from './scroll';
 import { initFolders } from './folders';
 import { initFilters } from './filters';
-import { initChess } from './chess';
+import { initShowcase } from './showcase';
 import { initMenu, initContactForm } from './ui';
 
-function heroIntro(chessTl: gsap.core.Timeline | null) {
+function heroIntro(visualTl: gsap.core.Timeline | null) {
   const hero = document.querySelector<HTMLElement>('[data-hero]');
   const heading = hero?.querySelector<HTMLElement>('[data-hero-split]');
-  if (!hero || !heading) { chessTl?.play(); return null; }
+  if (!hero || !heading) { visualTl?.play(); return null; }
   if (reduceMotion) { gsap.set(heading, { visibility: 'visible' }); gsap.set('[data-hero-in]', { opacity: 1 }); return null; }
 
   const tl = gsap.timeline({ paused: true });
@@ -24,7 +24,7 @@ function heroIntro(chessTl: gsap.core.Timeline | null) {
     },
   });
   tl.fromTo(hero.querySelectorAll('[data-hero-in]'), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 1, ease: 'power3.out', stagger: 0.08 }, 0.5);
-  if (chessTl) tl.add(chessTl.play(), 0.2);
+  if (visualTl) tl.add(visualTl.play(), 0.2);
   return tl;
 }
 
@@ -46,8 +46,12 @@ async function start() {
   // Wait for web fonts so SplitText measures lines correctly.
   try { await document.fonts.ready; } catch { /* ignore */ }
 
-  const chessTl = initChess();
-  const intro = heroIntro(chessTl);
+  const intro = heroIntro(initShowcase());
+
+  // The 3D chessboard (Three.js) only loads on pages that have one.
+  if (document.querySelector('[data-chess3d]')) {
+    import('./chess3d').then((m) => m.initChess3D());
+  }
   initReveals();
 
   const go = () => intro?.play();

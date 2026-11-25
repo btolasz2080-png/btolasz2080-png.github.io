@@ -1,0 +1,56 @@
+---
+// What appears inside a device screen: your screenshot, or a designed placeholder.
+import { url } from '../lib/url';
+interface Props { title: string; kind?: 'desktop' | 'mobile'; image?: string; accent?: string }
+const { title, kind = 'desktop', image, accent = 'burgundy' } = Astro.props;
+---
+<div class={`scr scr-${kind} acc-${accent}`}>
+  {image ? <img src={url(image)} alt="" loading="lazy" /> : kind === 'desktop' ? (
+    <div class="ui">
+      <div class="ui-nav"><b></b><span></span><span></span><span></span></div>
+      <div class="ui-hero">
+        <p class="ui-title">{title}</p>
+        <span class="ui-line"></span><span class="ui-line short"></span>
+        <span class="ui-btn"></span>
+      </div>
+      <div class="ui-grid"><span></span><span></span><span></span></div>
+    </div>
+  ) : (
+    <div class="ui ui-m">
+      <div class="ui-notch"></div>
+      <p class="ui-title">{title}</p>
+      <span class="ui-line"></span><span class="ui-line short"></span>
+      <div class="ui-card"></div><div class="ui-card alt"></div>
+      <span class="ui-btn"></span>
+    </div>
+  )}
+</div>
+
+<style>
+  .scr { --acc: var(--burgundy); --acc-soft: var(--blue); width: 100%; height: 100%; background: var(--paper); overflow: hidden; container-type: inline-size; }
+  .acc-blue { --acc: var(--blue); --acc-soft: var(--burgundy); }
+  .acc-espresso { --acc: var(--espresso); }
+  .acc-mocha { --acc: var(--mocha); }
+  .scr img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+  .ui { height: 100%; display: flex; flex-direction: column; padding: 5cqi 7cqi; gap: 6cqi; font-family: var(--serif); }
+  .ui-nav { display: flex; gap: 5cqi; align-items: center; }
+  .ui-nav b { width: 10cqi; height: 1.6cqi; background: var(--acc); border-radius: 2px; }
+  .ui-nav span { width: 7cqi; height: 1cqi; background: rgba(26, 9, 5, .2); border-radius: 2px; }
+  .ui-nav span:first-of-type { margin-left: auto; }
+  .ui-hero { display: grid; gap: 2cqi; }
+  .ui-title { margin: 0; font-size: 7cqi; line-height: 1; color: var(--espresso); font-weight: 500; }
+  .ui-line { display: block; height: 1.4cqi; width: 60%; border-radius: 3px; background: rgba(26, 9, 5, .15); }
+  .ui-line.short { width: 38%; }
+  .ui-btn { display: block; width: 18cqi; height: 3.6cqi; border-radius: 99px; background: var(--acc); margin-top: 1cqi; }
+  .ui-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3cqi; flex: 1; }
+  .ui-grid span { border-radius: 1.5cqi; background: var(--acc); }
+  .ui-grid span:nth-child(2) { background: var(--acc-soft); }
+  .ui-grid span:nth-child(3) { background: var(--beige-2); }
+  .ui-m { padding: 10cqi 9cqi; gap: 5cqi; }
+  .ui-m .ui-title { font-size: 11cqi; }
+  .ui-notch { width: 34cqi; height: 6cqi; margin: -4cqi auto 4cqi; border-radius: 99px; background: #140603; }
+  .ui-m .ui-line { height: 2.4cqi; width: 80%; }
+  .ui-card { flex: 1; border-radius: 6cqi; background: var(--acc); }
+  .ui-card.alt { flex: .6; background: var(--acc-soft); }
+  .ui-m .ui-btn { width: 60%; height: 8cqi; }
+</style>

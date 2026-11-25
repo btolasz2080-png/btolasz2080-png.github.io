@@ -24,6 +24,10 @@ export const site = {
   github: 'https://github.com/your-username',
   linkedin: 'https://www.linkedin.com/in/your-username',
   cv: '/cv.pdf', // put your CV in /public/cv.pdf
+  photo: '', // e.g. '/images/me.jpg' — shown in the header circle and on the About page
+
+  // Your GitHub repository (used by the private "+ Add file" button)
+  repo: 'btolasz2080-png/btolasz2080-png.github.io',
 
   // Free form backend: create a form at formspree.io and paste its URL here,
   // e.g. 'https://formspree.io/f/abcdwxyz'. Leave empty to open the visitor's email app instead.
@@ -47,9 +51,9 @@ export const site = {
 
 export const nav = [
   { label: 'Work', href: '/projects/' },
+  { label: 'About', href: '/about/' },
   { label: 'Courses', href: '/courses/' },
   { label: 'Certificates', href: '/certificates/' },
   { label: 'Skills', href: '/skills/' },
-  { label: 'About', href: '/about/' },
   { label: 'Contact', href: '/contact/' },
 ];
