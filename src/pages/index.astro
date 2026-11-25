@@ -1,42 +1,52 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import HeroShowcase from '../components/HeroShowcase.astro';
-import Chess3D from '../components/Chess3D.astro';
 import FolderGrid from '../components/FolderGrid.astro';
-import Devices from '../components/Devices.astro';
 import CertificatePaper from '../components/CertificatePaper.astro';
 import Seal from '../components/Seal.astro';
 import { site } from '../data/site';
 import { skillGroups } from '../data/skills';
 import { url, formatDate, platforms, type PlatformKey } from '../lib/url';
+import { addUrl } from '../lib/admin';
 
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
-const featured = projects.filter((p) => p.data.featured).slice(0, 3);
 const courses = (await getCollection('courses')).sort((a, b) => +b.data.completed - +a.data.completed);
 const certs = (await getCollection('certificates')).sort((a, b) => +b.data.issued - +a.data.issued);
 const allSkills = skillGroups.flatMap((g) => g.items);
 const pad = (n: number) => String(n).padStart(2, '0');
 
-// "*word*" in the headline becomes the burgundy italic accent
 const headline = site.headline.map((line) =>
   line.split(/(\*[^*]+\*)/).filter(Boolean).map((part) => (part.startsWith('*') ? { accent: true, text: part.slice(1, -1) } : { accent: false, text: part })),
 );
 
-const courseFolders = (Object.keys(platforms) as PlatformKey[]).map((k) => {
-  const list = courses.filter((c) => c.data.platform === k);
-  return {
-    label: platforms[k].label,
-    href: `/courses/${k}/`,
-    color: platforms[k].folder,
-    meta: `${pad(list.length)} courses`,
-    papers: list.map((c) => c.data.title),
-  };
+const courseFolder = (k: PlatformKey) => ({
+  id: k,
+  label: platforms[k].label,
+  color: platforms[k].folder,
+  href: `/courses/${k}/`,
+  addHref: addUrl[k](),
+  addLabel: 'Add course',
+  items: courses.filter((c) => c.data.platform === k).map((c) => ({ title: c.data.title, href: `/courses/${k}/`, meta: `${c.data.provider} · ${formatDate(c.data.completed)}` })),
 });
+
+const folders = [
+  courseFolder('cisco'),
+  courseFolder('coursera'),
+  courseFolder('other'),
+  {
+    id: 'certificates', label: 'Certificates', color: 'paper', href: '/certificates/', addHref: addUrl.certificate(), addLabel: 'Add certificate',
+    items: certs.map((c) => ({ title: c.data.title, href: `/certificates/${c.id}/`, meta: `${c.data.issuer} · ${formatDate(c.data.issued)}` })),
+  },
+  {
+    id: 'projects', label: 'Projects', color: 'espresso', href: '/projects/', addHref: addUrl.project(), addLabel: 'Add project',
+    items: projects.map((p) => ({ title: p.data.title, href: `/projects/${p.id}/`, meta: `${p.data.category} · ${p.data.year}` })),
+    empty: 'My college projects are being uploaded to GitHub — coming soon.',
+  },
+];
 ---
-<Base>
-  <!-- ───────────── HERO ───────────── -->
-  <section class="hero" data-hero>
+<Base darkHeader>
+  <!-- ───────────── HERO: the binary queen ───────────── -->
+  <section class="hero dark" data-hero>
     <div class="wrap hero-grid">
       <div class="hero-copy">
         <p class="eyebrow" data-hero-in>{site.eyebrow.join(' · ')}</p>
@@ -45,97 +55,58 @@ const courseFolders = (Object.keys(platforms) as PlatformKey[]).map((k) => {
             <span class="hl-line">{parts.map((p) => (p.accent ? <span class="accent">{p.text}</span> : <span class="gold">{p.text}</span>))}</span>
           ))}
         </h1>
-        <p class="lead hero-intro" data-hero-in>I'm <strong>{site.name}</strong>. {site.intro}</p>
+        <p class="lead hero-intro" data-hero-in>Hi, I'm <strong>{site.name}</strong>. {site.intro}</p>
         <div class="hero-actions" data-hero-in>
-          <a class="btn" href={url('/projects/')} data-magnetic>See my work <span class="arrow" aria-hidden="true">→</span></a>
-          <a class="btn ghost" href={url(site.cv)} data-magnetic download>Download CV</a>
-          <a class="icon-btn" href={site.github} target="_blank" rel="noopener" aria-label="GitHub" data-magnetic>
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.4-4-1.4-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>
-          </a>
-          <a class="icon-btn" href={site.linkedin} target="_blank" rel="noopener" aria-label="LinkedIn" data-magnetic>
-            <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M20.4 20.5h-3.6v-5.6c0-1.3 0-3-1.8-3s-2.1 1.4-2.1 2.9v5.7H9.4V9h3.4v1.6c.5-.9 1.6-1.8 3.4-1.8 3.6 0 4.3 2.4 4.3 5.5v6.2zM5.3 7.4a2.1 2.1 0 1 1 0-4.2 2.1 2.1 0 0 1 0 4.2zM7.1 20.5H3.5V9h3.6v11.5zM22.2 0H1.8C.8 0 0 .8 0 1.7v20.6c0 .9.8 1.7 1.8 1.7h20.4c1 0 1.8-.8 1.8-1.7V1.7C24 .8 23.2 0 22.2 0z"/></svg>
-          </a>
+          <a class="btn" href="#files" data-magnetic>Open my files <span class="arrow" aria-hidden="true">↓</span></a>
+          <a class="btn ghost" href={site.github} target="_blank" rel="noopener" data-magnetic>GitHub profile</a>
         </div>
-        <div class="hero-stats" data-hero-in>
-          <div><strong data-count={projects.length}>{pad(projects.length)}</strong><span>Projects</span></div>
-          <div><strong data-count={courses.length}>{pad(courses.length)}</strong><span>Courses</span></div>
-          <div><strong data-count={certs.length}>{pad(certs.length)}</strong><span>Certificates</span></div>
-        </div>
+        <p class="hero-status mono" data-hero-in><span class="live"></span>{site.availability}</p>
       </div>
-      <div class="hero-visual">
-        <HeroShowcase projects={featured} />
+      <div class="hero-visual" data-hero-in>
+        <div class="bq" data-binary-queen></div>
+        <p class="bq-hint mono">♛ move your mouse through the queen · click for a ripple</p>
       </div>
     </div>
   </section>
 
-  <!-- ───────────── WORK ───────────── -->
-  <section class="section" id="work">
+  <!-- ───────────── FILES (drop-down folders) ───────────── -->
+  <section class="section" id="files">
     <div class="wrap">
       <div class="section-head split">
         <div>
-          <p class="square-tag" data-reveal>01 — Work</p>
-          <h2 class="h2" data-split><span class="gold">Selected</span> <span class="accent">projects.</span></h2>
+          <p class="square-tag" data-reveal>01 — My files</p>
+          <h2 class="h2" data-split><span class="gold">Everything I learn,</span> <span class="accent">filed.</span></h2>
         </div>
-        <a class="btn ghost" href={url('/projects/')} data-reveal data-magnetic>All projects <span class="arrow" aria-hidden="true">→</span></a>
+        <p class="lead" data-reveal>Click a folder to open it. The files drop down underneath.</p>
       </div>
-      <div class="rows">
-        {featured.map((p, i) => (
-          <a class={`row ${i % 2 ? 'flip' : ''}`} href={url(`/projects/${p.id}/`)} data-cursor="View">
-            <div class="row-copy" data-reveal>
-              <span class="mono row-idx">{pad(i + 1)} / {p.data.category} · {p.data.year}</span>
-              <h3 class="h2 row-title">{p.data.title}</h3>
-              <p class="row-sum">{p.data.summary}</p>
-              <ul class="chips">{p.data.tech.map((t) => <li class="chip">{t}</li>)}</ul>
-              <span class="row-more mono">Read the case study →</span>
-            </div>
-            <div class={`row-stage acc-${p.data.accent}`} data-reveal>
-              <Devices title={p.data.title} accent={p.data.accent} desktopImage={p.data.desktopImage} mobileImage={p.data.mobileImage} size="lg" />
-            </div>
-          </a>
-        ))}
-      </div>
+      <FolderGrid items={folders as any} columns={5} />
     </div>
   </section>
 
-  <!-- ───────────── ABOUT + 3D QUEEN ───────────── -->
-  <section class="section about-strip dark" id="about">
+  <!-- ───────────── ABOUT ───────────── -->
+  <section class="section about-strip dark wine" id="about">
     <div class="wrap about-grid">
       <div class="about-copy">
         <p class="square-tag" data-reveal>02 — About</p>
-        <h2 class="h2" data-split><span class="gold">The queen is</span> <span class="accent">my favourite piece.</span></h2>
-        <p class="lead" data-reveal>{site.about.story[0]}</p>
-        <p class="lead" data-reveal>{site.about.story[1]}</p>
-        <div class="about-actions" data-reveal>
-          <a class="btn" href={url('/about/')} data-magnetic>More about me <span class="arrow" aria-hidden="true">→</span></a>
-        </div>
-        <div class="about-seal" data-reveal><Seal /></div>
+        <h2 class="h2" data-split><span class="gold">Small moves,</span> <span class="accent">every day.</span></h2>
+        {site.about.story.slice(0, 2).map((p) => <p class="lead" data-reveal>{p}</p>)}
+        <a class="btn" href={url('/about/')} data-magnetic data-reveal>More about me <span class="arrow" aria-hidden="true">→</span></a>
       </div>
-      <div class="about-board" data-reveal>
-        <Chess3D />
-      </div>
-    </div>
-  </section>
-
-  <!-- ───────────── COURSES (separate folders) ───────────── -->
-  <section class="section" id="courses">
-    <div class="wrap">
-      <div class="section-head split">
-        <div>
-          <p class="square-tag" data-reveal>03 — Courses</p>
-          <h2 class="h2" data-split><span class="gold">One folder</span> <span class="accent">per platform.</span></h2>
-        </div>
-        <p class="lead" data-reveal>Hover a folder to peek inside. Click to open it.</p>
-      </div>
-      <FolderGrid items={courseFolders as any} columns={3} />
+      <ol class="moves">
+        {site.about.timeline.map((t, i) => (
+          <li data-reveal><span class="mono mv">{i + 1}.</span><span class="yr">{t.year}</span><span class="tt">{t.title}<em class="mono">{t.place}</em></span></li>
+        ))}
+      </ol>
+      <div class="about-seal"><Seal /></div>
     </div>
   </section>
 
   <!-- ───────────── CERTIFICATES ───────────── -->
-  <section class="section certs" id="certificates">
+  <section class="section" id="certificates">
     <div class="wrap">
       <div class="section-head split">
         <div>
-          <p class="square-tag" data-reveal>04 — Certificates</p>
+          <p class="square-tag" data-reveal>03 — Certificates</p>
           <h2 class="h2" data-split><span class="gold">Earned, and</span> <span class="accent">verified.</span></h2>
         </div>
         <a class="btn ghost" href={url('/certificates/')} data-reveal data-magnetic>All certificates <span class="arrow" aria-hidden="true">→</span></a>
@@ -158,7 +129,7 @@ const courseFolders = (Object.keys(platforms) as PlatformKey[]).map((k) => {
   <!-- ───────────── SKILLS ───────────── -->
   <section class="marquees" aria-label="Skills" id="skills">
     <div class="wrap skills-head">
-      <p class="square-tag" data-reveal>05 — Skills</p>
+      <p class="square-tag" data-reveal>04 — Skills</p>
       <a class="link-line mono" href={url('/skills/')} data-reveal>See all {allSkills.length} skills →</a>
     </div>
     <div class="marquee" data-marquee="left">
@@ -168,55 +139,46 @@ const courseFolders = (Object.keys(platforms) as PlatformKey[]).map((k) => {
     </div>
     <div class="marquee alt" data-marquee="right">
       <div class="marquee-track">
-        {[0, 1].map(() => allSkills.slice(12).concat(allSkills.slice(0, 6)).map((s) => <span class="mq-item">{s}<i aria-hidden="true">✦</i></span>))}
+        {[0, 1].map(() => allSkills.slice(12).concat(allSkills.slice(0, 6)).map((s) => <span class="mq-item">{s}<i aria-hidden="true">01</i></span>))}
       </div>
     </div>
   </section>
 </Base>
 
 <style>
-  .hero { position: relative; overflow-x: clip; min-height: 100svh; padding: 120px 0 60px; display: grid; align-content: center; }
-  .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(24px, 4vw, 64px); align-items: center; }
+  .hero { position: relative; z-index: 2; overflow: hidden; min-height: 100svh; padding: 110px 0 50px; display: grid; align-content: center; }
+  .hero::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(60% 70% at 72% 55%, rgba(201, 165, 94, .10), transparent 70%); }
+  .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: .95fr 1.05fr; gap: clamp(20px, 3vw, 48px); align-items: center; }
   .hero-copy { display: grid; gap: 1.5rem; justify-items: start; }
-  .hero-title { font-size: clamp(3.3rem, 7vw, 7rem); }
+  .hero-title { font-size: clamp(3.2rem, 6.6vw, 6.6rem); }
   .hl-line { display: block; }
   .hero-intro { margin: 0; }
   .hero-intro strong { color: var(--ink); font-weight: 600; }
-  .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem; }
-  .icon-btn { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); transition: background .4s, color .4s; }
-  .icon-btn:hover { background: var(--espresso); color: var(--beige); }
-  .hero-stats { display: flex; gap: clamp(20px, 4vw, 48px); padding-top: 1.2rem; margin-top: .4rem; border-top: 1px solid var(--line); }
-  .hero-stats div { display: grid; }
-  .hero-stats strong { font-family: var(--serif); font-weight: 500; font-size: clamp(2rem, 3.2vw, 2.8rem); line-height: 1; color: var(--burgundy); }
-  .hero-stats span { font-family: var(--mono); font-size: .64rem; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: .7rem; }
+  .hero-status { display: inline-flex; align-items: center; gap: .7em; color: var(--ink-soft); font-size: .68rem; margin: 0; }
+  .live { width: 8px; height: 8px; border-radius: 50%; background: #D9B064; box-shadow: 0 0 0 4px rgba(217, 176, 100, .2); }
+  .hero-visual { display: grid; gap: .6rem; }
+  .bq { position: relative; width: 100%; aspect-ratio: 1 / 1.02; touch-action: pan-y; }
+  .bq :global(canvas) { position: absolute; inset: 0; cursor: crosshair; }
+  .bq-hint { margin: 0; text-align: center; color: var(--ink-soft); font-size: .64rem; }
   @media (max-width: 900px) {
     .hero-grid { grid-template-columns: 1fr; }
-    .hero { padding-top: 100px; }
+    .hero-visual { order: -1; max-width: 460px; width: 100%; margin: 0 auto; }
+    .hero { padding-top: 90px; }
   }
 
-  .rows { display: grid; gap: clamp(70px, 10vw, 140px); }
-  .row { display: grid; grid-template-columns: .8fr 1.2fr; gap: clamp(28px, 5vw, 80px); align-items: center; }
-  .row.flip .row-copy { order: 2; }
-  .row-copy { display: grid; gap: 1.1rem; justify-items: start; }
-  .row-idx { color: var(--burgundy); }
-  .row-title { transition: color .4s; }
-  .row:hover .row-title { color: var(--burgundy); }
-  .row-sum { margin: 0; color: var(--ink-soft); font-size: 1.08rem; }
-  .row-more { color: var(--ink); border-bottom: 1px solid currentColor; padding-bottom: 2px; }
-  .row-stage { border-radius: 18px; padding: 7% 6% 5%; background: #D9C9C0; transition: background .7s var(--ease); }
-  .row-stage.acc-blue { background: #C3D0D8; }
-  .row-stage.acc-espresso { background: #CFC6B4; }
-  .row-stage.acc-mocha { background: #D7CDBA; }
-  .row:hover .row-stage { background: var(--blue); }
-  @media (max-width: 860px) { .row { grid-template-columns: 1fr; } .row.flip .row-copy { order: 0; } .row-stage { order: -1; } }
-
   .about-strip { position: relative; z-index: 2; overflow: hidden; }
-  .about-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: clamp(28px, 5vw, 70px); align-items: center; }
-  .about-copy { display: grid; gap: 1.3rem; justify-items: start; position: relative; }
+  .about-grid { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 6vw, 90px); align-items: center; }
+  .about-copy { display: grid; gap: 1.3rem; justify-items: start; }
   .about-copy .lead { margin: 0; }
-  .about-actions { margin-top: .6rem; }
-  .about-seal { margin-top: 1.4rem; }
-  @media (max-width: 900px) { .about-grid { grid-template-columns: 1fr; } .about-board { order: -1; } .about-seal { display: none; } }
+  .moves { list-style: none; margin: 0; padding: 0; }
+  .moves li { display: grid; grid-template-columns: 2.4rem 5rem 1fr; align-items: baseline; gap: 1rem; padding: 1.2rem 0; border-bottom: 1px solid var(--line); }
+  .mv { color: var(--blue); }
+  .yr { font-family: var(--serif); font-style: italic; font-size: 1.8rem; color: #E2C98A; line-height: 1; }
+  .tt { font-family: var(--serif); font-size: 1.35rem; line-height: 1.2; display: grid; gap: .25rem; }
+  .tt em { font-style: normal; color: var(--ink-soft); font-size: .62rem; }
+  .about-seal { position: absolute; right: -20px; top: -40px; opacity: .9; }
+  @media (max-width: 860px) { .about-grid { grid-template-columns: 1fr; } .about-seal { display: none; } }
 
   .cert-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(18px, 3vw, 36px); }
   .cert-card { display: grid; gap: 1.2rem; }
@@ -233,5 +195,5 @@ const courseFolders = (Object.keys(platforms) as PlatformKey[]).map((k) => {
   .mq-item { display: inline-flex; align-items: center; gap: .5em; font-family: var(--serif); font-size: clamp(2.2rem, 5vw, 4.4rem); line-height: 1.15; padding-right: .5em; }
   .mq-item i { font-style: normal; font-size: .45em; color: var(--burgundy); -webkit-text-fill-color: var(--burgundy); }
   .marquee.alt .mq-item { font-size: clamp(1.4rem, 2.6vw, 2.2rem); font-style: italic; }
-  .marquee.alt .mq-item i { color: var(--blue); -webkit-text-fill-color: var(--blue); }
+  .marquee.alt .mq-item i { font-family: var(--mono); font-size: .5em; color: var(--blue); -webkit-text-fill-color: var(--blue); }
 </style>

@@ -267,3 +267,7 @@ html.pt-busy .pt { pointer-events: all; }
 @media (prefers-reduced-motion: reduce) { .js [data-hero-split] { visibility: visible; } }
 .js [data-hero-in] { opacity: 0; }
 @media (prefers-reduced-motion: reduce) { .js [data-hero-in] { opacity: 1; } }
+
+/* private admin controls (turned on with ?admin=1) */
+.admin-only { display: none !important; }
+.admin-on .admin-only { display: inline-flex !important; }

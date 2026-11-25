@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { platforms, url, formatDate, type PlatformKey } from '../../lib/url';
+import { addUrl } from '../../lib/admin';
 
 export async function getStaticPaths() {
   return (Object.keys(platforms) as PlatformKey[]).map((platform) => ({ params: { platform } }));
@@ -22,6 +23,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
       <p class="square-tag" data-reveal>{info.code} — {info.long}</p>
       <h1 class="h1" data-split><span class="gold">{info.label}</span> <span class="accent">courses.</span></h1>
       <p class="lead" data-reveal>{pad(courses.length)} {courses.length === 1 ? 'course' : 'courses'} in this folder, newest first.</p>
+      <a class="btn admin-only" href={addUrl[platform]()} target="_blank" rel="noopener">+ Add {info.label} course</a>
     </div>
   </section>
 

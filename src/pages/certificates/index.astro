@@ -4,12 +4,14 @@ import Base from '../../layouts/Base.astro';
 import PageHead from '../../components/PageHead.astro';
 import CertificatePaper from '../../components/CertificatePaper.astro';
 import { url, formatDate, platforms, type PlatformKey } from '../../lib/url';
+import { addUrl } from '../../lib/admin';
 
 const certs = (await getCollection('certificates')).sort((a, b) => +b.data.issued - +a.data.issued);
 const used = (Object.keys(platforms) as PlatformKey[]).filter((k) => certs.some((c) => c.data.platform === k));
 ---
 <Base title="Certificates" description="Verified certificates, each with its own detail page.">
   <PageHead tag="e5 — Credentials" title="Certificates" accent="& proof." lead="Every certificate links to its issuer so anyone can verify it.">
+    <a class="btn admin-only" href={addUrl.certificate()} target="_blank" rel="noopener" style="margin-top:1.6rem">+ Add certificate</a>
     <div class="filters" data-filter-group="#cert-grid" data-reveal role="group" aria-label="Filter certificates">
       <button type="button" data-filter="all" aria-pressed="true">All <sup>{certs.length}</sup></button>
       {used.map((k) => (

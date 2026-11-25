@@ -90,6 +90,9 @@ export function initHeader() {
   const header = document.querySelector<HTMLElement>('[data-header]');
   if (!header) return;
   let hidden = false;
+  const mark = () => header.classList.toggle('scrolled', window.scrollY > 30);
+  window.addEventListener('scroll', mark, { passive: true });
+  mark();
   ScrollTrigger.create({
     start: 0,
     end: 'max',

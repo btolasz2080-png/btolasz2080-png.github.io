@@ -16,7 +16,7 @@ export let lenis: Lenis | null = null;
 
 export function initSmoothScroll() {
   if (reduceMotion) return;
-  lenis = new Lenis({ lerp: 0.11, smoothWheel: true });
+  lenis = new Lenis({ lerp: 0.11, smoothWheel: true, anchors: { offset: -80 } });
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((time) => lenis?.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);

@@ -1,91 +1,122 @@
 ---
-// Separate, realistic file folders. Hover: the front flap tips open and the
-// papers inside rise so you can read what's in the folder. Click to open it.
-import { url } from '../lib/url';
-
+// Drop-down file folders. Click a folder: it opens in place and the files
+// inside drop down underneath. In admin mode each folder also has "+ Add".
+export interface FolderItem { title: string; href: string; meta?: string }
 export interface Folder {
+  id: string;
   label: string;
-  href: string;
   color: 'mocha' | 'blue' | 'burgundy' | 'paper' | 'espresso';
   meta?: string;
-  papers?: string[]; // titles printed on the sheets inside
-  teaser?: string;
+  items: FolderItem[];
+  href?: string;     // full page for this folder
+  addHref?: string;  // GitHub "new file" link (admin only)
+  addLabel?: string;
+  empty?: string;
 }
-interface Props { items: Folder[]; columns?: 2 | 3 | 4 }
+import { url } from '../lib/url';
+interface Props { items: Folder[]; columns?: 2 | 3 | 4 | 5 }
 const { items, columns = 3 } = Astro.props;
 const hex = { mocha: '#3A2119', blue: '#94B1C8', burgundy: '#4C050C', paper: '#ECE9DD', espresso: '#1A0905' };
 ---
 <div class={`fgrid cols-${columns}`}>
   {items.map((f, i) => (
-    <a class={`fld f-${f.color}`} href={url(f.href)} data-fld data-cursor="Open" data-reveal style={`--tab:${[8, 38, 22, 52][i % 4]}%`}>
-      <span class="fld-back"><span class="fld-tab">{f.label}</span></span>
-      <span class="fld-papers" data-fld-papers>
-        {(f.papers?.length ? f.papers : ['', '', '']).slice(0, 3).reverse().map((p, j) => (
-          <span class="paper" style={`--j:${j}`}><b>{p}</b><i></i><i></i><i class="s"></i></span>
-        ))}
-      </span>
-      <span class="fld-front" data-fld-front>
-        <span class="fld-row"><span class="mono">{hex[f.color]}</span>{f.meta && <span class="mono">{f.meta}</span>}</span>
-        <span class="fld-name">{f.label}</span>
-        {f.teaser && <span class="fld-teaser">{f.teaser}</span>}
-        <span class="fld-open mono">Open folder →</span>
-      </span>
-    </a>
+    <div class={`fld f-${f.color}`} data-fld style={`--tab:${[8, 36, 20, 50, 28][i % 5]}%`} data-reveal>
+      <button type="button" class="fld-face" aria-expanded="false" aria-controls={`drop-${f.id}`} data-fld-toggle data-cursor="Open">
+        <span class="fld-back"><span class="fld-tab">{f.label}</span></span>
+        <span class="fld-papers">
+          {(f.items.length ? f.items.map((x) => x.title) : ['', '', '']).slice(0, 3).reverse().map((p, j) => (
+            <span class="paper" style={`--j:${j}`}><b>{p}</b><i></i><i></i><i class="s"></i></span>
+          ))}
+        </span>
+        <span class="fld-front" data-fld-front>
+          <span class="fld-row"><span class="mono">{hex[f.color]}</span><span class="mono">{f.meta ?? `${String(f.items.length).padStart(2, '0')} files`}</span></span>
+          <span class="fld-name">{f.label}</span>
+          <span class="fld-hint mono"><span class="fld-arrow" aria-hidden="true">▾</span> <span class="when-closed">Open folder</span><span class="when-open">Close folder</span></span>
+        </span>
+      </button>
+      <div class="fld-drop" id={`drop-${f.id}`} data-fld-drop hidden>
+        <div class="drop-inner">
+          {f.items.length ? (
+            <ol class="files">
+              {f.items.map((x, n) => (
+                <li><a href={url(x.href)}><span class="mono n">{String(n + 1).padStart(2, '0')}</span><span class="t">{x.title}</span>{x.meta && <span class="mono m">{x.meta}</span>}</a></li>
+              ))}
+            </ol>
+          ) : <p class="empty">{f.empty ?? 'Nothing filed here yet.'}</p>}
+          <div class="drop-actions">
+            {f.href && <a class="mono link-line" href={url(f.href)}>Open full folder →</a>}
+            {f.addHref && <a class="add admin-only" href={f.addHref} target="_blank" rel="noopener">+ {f.addLabel ?? 'Add file'}</a>}
+          </div>
+        </div>
+      </div>
+    </div>
   ))}
 </div>
 
 <style>
-  .fgrid { display: grid; gap: clamp(28px, 4vw, 48px) clamp(18px, 3vw, 36px); }
+  .fgrid { display: grid; gap: clamp(28px, 4vw, 44px) clamp(16px, 2.4vw, 30px); align-items: start; }
   .cols-2 { grid-template-columns: repeat(2, 1fr); }
   .cols-3 { grid-template-columns: repeat(3, 1fr); }
   .cols-4 { grid-template-columns: repeat(4, 1fr); }
-  @media (max-width: 1000px) { .cols-3, .cols-4 { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 600px) { .fgrid { grid-template-columns: 1fr !important; } }
+  .cols-5 { grid-template-columns: repeat(5, 1fr); }
+  @media (max-width: 1100px) { .cols-4, .cols-5 { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 860px) { .cols-3, .cols-4, .cols-5 { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .fgrid { grid-template-columns: 1fr !important; } }
 
   .fld {
     --fbg: var(--mocha); --fink: var(--beige); --fdark: #24130D;
-    position: relative; display: block; aspect-ratio: 1.18; perspective: 900px;
-    padding-top: 34px; color: var(--fink);
+    position: relative; color: var(--fink);
   }
   .f-blue { --fbg: #94B1C8; --fink: var(--espresso); --fdark: #6F8EA7; }
   .f-burgundy { --fbg: #4C050C; --fink: var(--beige); --fdark: #2E0207; }
   .f-paper { --fbg: #E8E2CF; --fink: var(--espresso); --fdark: #C9C0A6; }
-  .f-espresso { --fbg: #1A0905; --fink: var(--beige); --fdark: #0A0302; }
-  .f-mocha { --fdark: #24130D; }
+  .f-espresso { --fbg: #1A0905; --fink: var(--beige); --fdark: #000; }
 
-  /* back panel + tab */
-  .fld-back { position: absolute; inset: 34px 0 0; background: linear-gradient(var(--fdark), var(--fbg) 40%); border-radius: 4px 10px 10px 10px; box-shadow: 0 24px 40px -22px rgba(26, 9, 5, .6); }
+  .fld-face { position: relative; display: block; width: 100%; aspect-ratio: 1.2; padding: 0; text-align: left; color: inherit; perspective: 900px; }
+  .fld-back { position: absolute; inset: 30px 0 0; background: linear-gradient(var(--fdark), var(--fbg) 45%); border-radius: 4px 10px 10px 10px; box-shadow: 0 24px 40px -22px rgba(26, 9, 5, .6); }
   .fld-tab {
-    position: absolute; bottom: 100%; left: var(--tab); height: 34px; padding: 0 1.8em;
+    position: absolute; bottom: 100%; left: var(--tab); height: 30px; padding: 0 1.6em;
     display: grid; place-items: center; background: var(--fdark);
     clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%); border-radius: 8px 8px 0 0;
-    font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; font-weight: 500; white-space: nowrap; color: var(--fink);
+    font-size: .66rem; letter-spacing: .16em; text-transform: uppercase; font-weight: 500; white-space: nowrap; color: var(--fink);
   }
-  /* papers */
-  .fld-papers { position: absolute; left: 6%; right: 6%; top: 44px; bottom: 10%; }
+  .fld-papers { position: absolute; left: 6%; right: 6%; top: 40px; bottom: 12%; }
   .paper {
-    position: absolute; inset: 0; background: #FBF8EF; border-radius: 3px;
-    box-shadow: 0 2px 6px rgba(26, 9, 5, .18);
-    padding: 12% 9% 0; display: grid; align-content: start; gap: 7px;
-    transform: translate(calc(var(--j) * 7px), calc(var(--j) * 8px)) rotate(calc((var(--j) - 1) * 1.4deg));
-    color: var(--espresso);
+    position: absolute; inset: 0; background: #FBF8EF; border-radius: 3px; box-shadow: 0 2px 6px rgba(26, 9, 5, .18);
+    padding: 11% 9% 0; display: grid; align-content: start; gap: 7px; color: var(--espresso);
+    transform: translate(calc(var(--j) * 6px), calc(var(--j) * 7px)) rotate(calc((var(--j) - 1) * 1.4deg));
   }
-  .paper b { font-family: var(--serif); font-weight: 600; font-size: .95rem; line-height: 1.1; min-height: 1.1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .paper b { font-family: var(--serif); font-weight: 600; font-size: .92rem; line-height: 1.1; min-height: 1.1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .paper i { display: block; height: 4px; width: 80%; background: rgba(26, 9, 5, .12); border-radius: 2px; }
   .paper i.s { width: 50%; }
-  /* front flap */
   .fld-front {
-    position: absolute; left: 0; right: 0; bottom: 0; height: 74%;
-    background: linear-gradient(170deg, color-mix(in srgb, var(--fbg) 88%, white), var(--fbg) 45%);
-    border-radius: 6px 6px 10px 10px;
-    transform-origin: 50% 100%;
+    position: absolute; left: 0; right: 0; bottom: 0; height: 72%;
+    background: linear-gradient(170deg, color-mix(in srgb, var(--fbg) 86%, white), var(--fbg) 45%);
+    border-radius: 6px 6px 10px 10px; transform-origin: 50% 100%;
     box-shadow: 0 -6px 16px -8px rgba(26, 9, 5, .35), inset 0 1px 0 rgba(255, 255, 255, .18);
-    padding: clamp(14px, 2vw, 22px); display: grid; align-content: start; gap: 6px;
-    will-change: transform;
+    padding: clamp(14px, 2vw, 20px); display: flex; flex-direction: column; gap: 4px;
   }
-  .fld-row { display: flex; justify-content: space-between; gap: 1rem; opacity: .75; font-size: .62rem; }
-  .fld-row .mono { font-size: .62rem; }
-  .fld-name { font-family: var(--serif); font-size: clamp(1.7rem, 2.6vw, 2.4rem); line-height: 1; margin-top: .3rem; }
-  .fld-teaser { font-size: .88rem; opacity: .8; line-height: 1.4; max-width: 30ch; }
-  .fld-open { position: absolute; left: clamp(14px, 2vw, 22px); bottom: clamp(12px, 1.6vw, 18px); font-size: .64rem; opacity: .7; }
+  .fld-row { display: flex; justify-content: space-between; gap: 1rem; opacity: .72; }
+  .fld-row .mono { font-size: .6rem; }
+  .fld-name { font-family: var(--serif); font-size: clamp(1.45rem, 2vw, 2rem); line-height: 1; margin-top: .3rem; }
+  .fld-hint { margin-top: auto; font-size: .62rem; opacity: .75; display: inline-flex; gap: .4em; align-items: center; }
+  .fld-arrow { display: inline-block; transition: transform .5s var(--ease); }
+  .when-open { display: none; }
+  .fld.is-open .when-open { display: inline; }
+  .fld.is-open .when-closed { display: none; }
+  .fld.is-open .fld-arrow { transform: rotate(180deg); }
+
+  .fld-drop { overflow: hidden; }
+  .drop-inner { margin-top: 10px; background: #FBF8EF; color: var(--espresso); border-radius: 10px; padding: 8px; box-shadow: 0 18px 30px -20px rgba(26, 9, 5, .5), inset 0 3px 0 var(--fbg); --ink: var(--espresso); --ink-soft: rgba(26, 9, 5, .65); --line: rgba(26, 9, 5, .12); }
+  .files { list-style: none; margin: 0; padding: 0; }
+  .files li + li { border-top: 1px solid var(--line); }
+  .files a { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; padding: 10px 10px; border-radius: 6px; transition: background .3s; }
+  .files a:hover { background: rgba(148, 177, 200, .25); }
+  .files .n { color: var(--burgundy); font-size: .62rem; padding-top: .35em; grid-row: span 2; }
+  .files .t { font-family: var(--serif); font-size: 1.15rem; line-height: 1.15; }
+  .files .m { color: var(--ink-soft); font-size: .6rem; }
+  .empty { margin: 0; padding: 14px 10px; color: var(--ink-soft); font-family: var(--serif); font-style: italic; font-size: 1.1rem; }
+  .drop-actions { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .6rem; padding: 10px 10px 6px; border-top: 1px solid var(--line); }
+  .drop-actions .mono { font-size: .62rem; color: var(--burgundy); }
+  .add { align-items: center; padding: .45em .9em; border-radius: 999px; background: var(--burgundy); color: var(--beige); font-size: .8rem; }
 </style>

@@ -5,7 +5,7 @@ import { initCursor, initMagnetic, initTilt } from './pointer';
 import { initReveals, initCounters, initMarquees, initSeals, initHeader } from './scroll';
 import { initFolders } from './folders';
 import { initFilters } from './filters';
-import { initShowcase } from './showcase';
+import { initBinaryQueen } from './binaryQueen';
 import { initMenu, initContactForm } from './ui';
 
 function heroIntro(visualTl: gsap.core.Timeline | null) {
@@ -46,12 +46,8 @@ async function start() {
   // Wait for web fonts so SplitText measures lines correctly.
   try { await document.fonts.ready; } catch { /* ignore */ }
 
-  const intro = heroIntro(initShowcase());
-
-  // The 3D chessboard (Three.js) only loads on pages that have one.
-  if (document.querySelector('[data-chess3d]')) {
-    import('./chess3d').then((m) => m.initChess3D());
-  }
+  const intro = heroIntro(null);
+  initBinaryQueen();
   initReveals();
 
   const go = () => intro?.play();

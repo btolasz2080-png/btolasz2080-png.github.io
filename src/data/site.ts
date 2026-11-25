@@ -8,16 +8,16 @@ export const site = {
   initials: 'YN',
   title: 'Computer Science Student',
 
-  // The small line above the hero headline (like "CS SENIOR · AI TRACK · UNIVERSITY")
-  eyebrow: ['Computer Science', 'Your Track', 'Your University'],
+  // The small line above the hero headline
+  eyebrow: ['Computer Science', 'Sophomore', 'Your University'],
 
   // Hero headline. Wrap ONE word in *stars* to make it the burgundy italic accent.
-  headline: ['I plan every', '*move* before', 'I write a', 'line of code.'],
+  headline: ['Learning to build,', '*one move*', 'at a time.'],
 
   intro:
-    "I'm a computer science student who treats software like a game of chess — think a few moves ahead, protect the important pieces, and finish clean. I build web apps, machine-learning experiments and networked systems.",
+    "I'm a computer science student at the start of my journey. This is where I file everything I learn — my Cisco and Coursera courses, my certificates, and the projects I build at college.",
 
-  availability: 'Open to internships & collaborations',
+  availability: 'Currently learning: networking, Python & web',
   location: 'Your City',
 
   email: 'you@example.com',
@@ -35,17 +35,16 @@ export const site = {
 
   about: {
     story: [
-      "I fell for computer science the way people fall for chess: first the rules, then the patterns, then the quiet thrill of seeing several moves ahead.",
-      'Today I split my time between building products people can actually use, studying how machines learn, and understanding the networks that connect everything together.',
-      'I like clean architecture, honest documentation and interfaces that feel calm. Outside the screen you will find me at a chessboard, sketching layouts, or learning something new on a course platform.',
+      "I'm a sophomore computer science student. I like chess because every good game is built from small, careful moves — and that's how I'm learning to code.",
+      'Right now I am building my foundations: networking with Cisco, programming courses on Coursera, and my first college projects, which I am uploading to GitHub one by one.',
+      'This portfolio grows with me. Every course, certificate and project gets its own file here.',
     ],
     timeline: [
-      { year: '2023', title: 'Started B.Sc. Computer Science', place: 'Your University' },
-      { year: '2024', title: 'First networking certification', place: 'Cisco Networking Academy' },
-      { year: '2025', title: 'Machine-learning specialization', place: 'Coursera' },
-      { year: '2026', title: 'Senior projects & internship search', place: 'Your University' },
+      { year: '2025', title: 'Started B.Sc. Computer Science', place: 'Your University' },
+      { year: '2025', title: 'First Cisco Networking Academy courses', place: 'Cisco' },
+      { year: '2026', title: 'Coursera courses & first college projects', place: 'Coursera · Your University' },
     ],
-    interests: ['Chess & strategy games', 'Editorial design', 'Open-source', 'Reading about AI ethics'],
+    interests: ['Chess & strategy games', 'Design', 'Learning new tools', 'Problem solving'],
   },
 };
 
