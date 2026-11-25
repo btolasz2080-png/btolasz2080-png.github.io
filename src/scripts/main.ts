@@ -6,6 +6,7 @@ import { initReveals, initCounters, initMarquees, initSeals, initHeader } from '
 import { initFolders } from './folders';
 import { initFilters } from './filters';
 import { initBinaryQueen } from './binaryQueen';
+import { initShowcase } from './showcase';
 import { initMenu, initContactForm } from './ui';
 
 function heroIntro(visualTl: gsap.core.Timeline | null) {
@@ -46,7 +47,7 @@ async function start() {
   // Wait for web fonts so SplitText measures lines correctly.
   try { await document.fonts.ready; } catch { /* ignore */ }
 
-  const intro = heroIntro(null);
+  const intro = heroIntro(initShowcase());
   initBinaryQueen();
   initReveals();
 

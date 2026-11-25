@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import FolderGrid from '../components/FolderGrid.astro';
+import HeroShowcase from '../components/HeroShowcase.astro';
 import CertificatePaper from '../components/CertificatePaper.astro';
 import Seal from '../components/Seal.astro';
 import { site } from '../data/site';
@@ -43,10 +44,15 @@ const folders = [
     empty: 'My college projects are being uploaded to GitHub — coming soon.',
   },
 ];
+const showcase = [
+  { title: 'Cisco Networking Academy', href: '/courses/cisco/', accent: 'burgundy', domain: 'my-files / cisco' },
+  { title: 'Coursera', href: '/courses/coursera/', accent: 'blue' },
+  { title: 'Certificates', href: '/certificates/', accent: 'espresso' },
+] as const;
 ---
-<Base darkHeader>
+<Base>
   <!-- ───────────── HERO: the binary queen ───────────── -->
-  <section class="hero dark" data-hero>
+  <section class="hero" data-hero>
     <div class="wrap hero-grid">
       <div class="hero-copy">
         <p class="eyebrow" data-hero-in>{site.eyebrow.join(' · ')}</p>
@@ -62,9 +68,8 @@ const folders = [
         </div>
         <p class="hero-status mono" data-hero-in><span class="live"></span>{site.availability}</p>
       </div>
-      <div class="hero-visual" data-hero-in>
-        <div class="bq" data-binary-queen></div>
-        <p class="bq-hint mono">♛ move your mouse through the queen · click for a ripple</p>
+      <div class="hero-visual">
+        <HeroShowcase items={[...showcase]} />
       </div>
     </div>
   </section>
@@ -84,13 +89,17 @@ const folders = [
   </section>
 
   <!-- ───────────── ABOUT ───────────── -->
-  <section class="section about-strip dark wine" id="about">
+  <section class="section about-strip dark" id="about">
     <div class="wrap about-grid">
       <div class="about-copy">
         <p class="square-tag" data-reveal>02 — About</p>
         <h2 class="h2" data-split><span class="gold">Small moves,</span> <span class="accent">every day.</span></h2>
         {site.about.story.slice(0, 2).map((p) => <p class="lead" data-reveal>{p}</p>)}
         <a class="btn" href={url('/about/')} data-magnetic data-reveal>More about me <span class="arrow" aria-hidden="true">→</span></a>
+      </div>
+      <div class="about-queen">
+        <div class="bq" data-binary-queen></div>
+        <p class="bq-hint mono">♛ move your mouse through the queen · click for a ripple</p>
       </div>
       <ol class="moves">
         {site.about.timeline.map((t, i) => (
@@ -146,29 +155,30 @@ const folders = [
 </Base>
 
 <style>
-  .hero { position: relative; z-index: 2; overflow: hidden; min-height: 100svh; padding: 110px 0 50px; display: grid; align-content: center; }
-  .hero::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(60% 70% at 72% 55%, rgba(201, 165, 94, .10), transparent 70%); }
-  .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: .95fr 1.05fr; gap: clamp(20px, 3vw, 48px); align-items: center; }
+  .hero { position: relative; z-index: 2; overflow-x: clip; min-height: 100svh; padding: 150px 0 70px; display: grid; align-content: center; }
+  .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(24px, 4vw, 64px); align-items: center; }
   .hero-copy { display: grid; gap: 1.5rem; justify-items: start; }
-  .hero-title { font-size: clamp(3.2rem, 6.6vw, 6.6rem); }
+  .hero-title { font-size: clamp(3rem, 5.6vw, 5.6rem); }
   .hl-line { display: block; }
   .hero-intro { margin: 0; }
   .hero-intro strong { color: var(--ink); font-weight: 600; }
   .hero-actions { display: flex; flex-wrap: wrap; gap: .7rem; }
   .hero-status { display: inline-flex; align-items: center; gap: .7em; color: var(--ink-soft); font-size: .68rem; margin: 0; }
-  .live { width: 8px; height: 8px; border-radius: 50%; background: #D9B064; box-shadow: 0 0 0 4px rgba(217, 176, 100, .2); }
-  .hero-visual { display: grid; gap: .6rem; }
-  .bq { position: relative; width: 100%; aspect-ratio: 1 / 1.02; touch-action: pan-y; }
+  .live { width: 8px; height: 8px; border-radius: 50%; background: #3F7A4F; box-shadow: 0 0 0 4px rgba(63, 122, 79, .18); }
+  .hero-visual { position: relative; }
+  .about-queen { display: grid; gap: .4rem; }
+  .bq { position: relative; width: 100%; max-width: 420px; margin: 0 auto; aspect-ratio: 1 / 1.02; touch-action: pan-y; }
   .bq :global(canvas) { position: absolute; inset: 0; cursor: crosshair; }
   .bq-hint { margin: 0; text-align: center; color: var(--ink-soft); font-size: .64rem; }
   @media (max-width: 900px) {
     .hero-grid { grid-template-columns: 1fr; }
-    .hero-visual { order: -1; max-width: 460px; width: 100%; margin: 0 auto; }
-    .hero { padding-top: 90px; }
+    .hero { padding-top: 110px; }
   }
 
   .about-strip { position: relative; z-index: 2; overflow: hidden; }
-  .about-grid { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 6vw, 90px); align-items: center; }
+  .about-grid { position: relative; display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(28px, 5vw, 70px); align-items: center; }
+  .moves { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 2rem; }
+  @media (max-width: 860px) { .moves { grid-template-columns: 1fr; } }
   .about-copy { display: grid; gap: 1.3rem; justify-items: start; }
   .about-copy .lead { margin: 0; }
   .moves { list-style: none; margin: 0; padding: 0; }

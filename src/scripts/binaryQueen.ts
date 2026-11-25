@@ -198,7 +198,7 @@ export function initBinaryQueen() {
   };
 
   const local = (e: PointerEvent) => { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
-  const surface = (host.closest('[data-hero]') as HTMLElement) || host;
+  const surface = (host.closest('section') as HTMLElement) || host;
   surface.addEventListener('pointermove', (e) => { const p = local(e); mouse.x = p.x; mouse.y = p.y; mouse.active = true; });
   surface.addEventListener('pointerleave', () => { mouse.active = false; });
   canvas.addEventListener('pointerdown', (e) => {

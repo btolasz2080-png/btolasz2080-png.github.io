@@ -22,13 +22,13 @@ const hex = { mocha: '#3A2119', blue: '#94B1C8', burgundy: '#4C050C', paper: '#E
   {items.map((f, i) => (
     <div class={`fld f-${f.color}`} data-fld style={`--tab:${[8, 36, 20, 50, 28][i % 5]}%`} data-reveal>
       <button type="button" class="fld-face" aria-expanded="false" aria-controls={`drop-${f.id}`} data-fld-toggle data-cursor="Open">
-        <span class="fld-back"><span class="fld-tab">{f.label}</span></span>
+        <span class="fld-back"><span class="fld-tab"><span class="fld-label">{f.label}</span></span></span>
         <span class="fld-papers">
           {(f.items.length ? f.items.map((x) => x.title) : ['', '', '']).slice(0, 3).reverse().map((p, j) => (
-            <span class="paper" style={`--j:${j}`}><b>{p}</b><i></i><i></i><i class="s"></i></span>
+            <span class="paper" style={`--j:${j}`}><b>{p}</b><i></i><i></i><i class="s"></i>{j === 2 && <span class="clip" aria-hidden="true"></span>}{j === 2 && p && <span class="stamp">{f.label}</span>}</span>
           ))}
         </span>
-        <span class="fld-front" data-fld-front>
+        <span class="fld-front" data-fld-front><span class="crease" aria-hidden="true"></span>
           <span class="fld-row"><span class="mono">{hex[f.color]}</span><span class="mono">{f.meta ?? `${String(f.items.length).padStart(2, '0')} files`}</span></span>
           <span class="fld-name">{f.label}</span>
           <span class="fld-hint mono"><span class="fld-arrow" aria-hidden="true">▾</span> <span class="when-closed">Open folder</span><span class="when-open">Close folder</span></span>
@@ -119,4 +119,41 @@ const hex = { mocha: '#3A2119', blue: '#94B1C8', burgundy: '#4C050C', paper: '#E
   .drop-actions { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .6rem; padding: 10px 10px 6px; border-top: 1px solid var(--line); }
   .drop-actions .mono { font-size: .62rem; color: var(--burgundy); }
   .add { align-items: center; padding: .45em .9em; border-radius: 999px; background: var(--burgundy); color: var(--beige); font-size: .8rem; }
+
+  /* ── realism layer: paper grain, label sticker, clip, creases ── */
+  .fld-back::before, .fld-front::before, .paper::before {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='40'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.004 .5' numOctaves='2'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .35 0'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>");
+    mix-blend-mode: multiply; opacity: .5;
+  }
+  .paper::before { opacity: .18; }
+  .f-paper .fld-back::before, .f-paper .fld-front::before, .f-blue .fld-front::before { opacity: .22; }
+  .fld-front { overflow: hidden; border-bottom: 3px solid color-mix(in srgb, var(--fbg) 70%, black); box-shadow: 0 -8px 18px -10px rgba(26, 9, 5, .45), inset 0 1px 0 rgba(255, 255, 255, .25), inset 0 -10px 18px -12px rgba(0, 0, 0, .35); }
+  .fld-front::after { /* soft light from the top-left, like a desk lamp */
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(120% 90% at 15% 0%, rgba(255, 255, 255, .22), transparent 55%), linear-gradient(transparent 70%, rgba(0, 0, 0, .12));
+  }
+  .crease { position: absolute; left: 0; right: 0; bottom: 16%; height: 7px; pointer-events: none;
+    background: linear-gradient(rgba(0, 0, 0, .16), rgba(255, 255, 255, .14) 50%, rgba(0, 0, 0, .1)); opacity: .55; }
+  .crease::after { content: ''; position: absolute; left: 0; right: 0; top: 12px; height: 5px; background: inherit; opacity: .7; }
+  .fld-front > *:not(.crease) { position: relative; z-index: 1; }
+  .fld-tab { padding: 0 1em; }
+  .fld-label {
+    display: inline-block; padding: 2px 10px 1px; background: #FBF8EF; color: #1A0905; border-radius: 2px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .25), inset 0 0 0 1px rgba(26, 9, 5, .06);
+    font-family: var(--mono); font-size: .62rem; letter-spacing: .14em; transform: rotate(-1.2deg);
+  }
+  .paper { background: linear-gradient(#FDFBF4, #F5F0E2); background-image: repeating-linear-gradient(transparent 0 17px, rgba(148, 177, 200, .35) 17px 18px), linear-gradient(#FDFBF4, #F5F0E2); background-position: 0 30px, 0 0; }
+  .clip {
+    position: absolute; top: -10px; right: 16%; width: 14px; height: 38px; border-radius: 8px;
+    border: 2.5px solid #9AA0A6; border-bottom-color: #7D838A;
+    background: linear-gradient(90deg, transparent 4px, rgba(255, 255, 255, .5) 5px, transparent 7px);
+    box-shadow: 1px 2px 2px rgba(0, 0, 0, .25);
+  }
+  .clip::after { content: ''; position: absolute; left: 2px; right: 2px; top: 6px; bottom: 8px; border: 2px solid #A9AFB5; border-radius: 6px; }
+  .stamp {
+    position: absolute; right: 9%; top: 28%; padding: 2px 8px; border: 2px solid rgba(76, 5, 12, .55); color: rgba(76, 5, 12, .6);
+    font-family: var(--mono); font-size: .56rem; letter-spacing: .18em; text-transform: uppercase; border-radius: 3px; transform: rotate(-8deg);
+  }
 </style>
